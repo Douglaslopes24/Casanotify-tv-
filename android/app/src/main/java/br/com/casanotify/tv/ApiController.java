@@ -18,7 +18,7 @@ public final class ApiController implements LanServer.Handler {
         context=c;prefs=p;overlay=o;accounts=SecretStore.accounts(c);phones=new PhoneTokens(c);cameras=new CameraStore(c);media=new MediaAssets(c);fingerprint=LocalTls.fingerprint();
         for(String name:new String[]{"index.html","panel.css","panel.js","terms.txt"})try(InputStream in=c.getAssets().open(name);ByteArrayOutputStream out=new ByteArrayOutputStream()){byte[] b=new byte[8192];int n;while((n=in.read(b))!=-1)out.write(b,0,n);assets.put(name,out.toByteArray());}
     }
-    private JSONObject info()throws Exception{return new JSONObject().put("app","CasaNotify TV").put("version","2.0.0").put("api_version",2).put("device_id",prefs.deviceId()).put("device_name",prefs.config().optString("device_name")).put("tls_port",Prefs.SECURE_PORT).put("tls_fingerprint",fingerprint);}
+    private JSONObject info()throws Exception{return new JSONObject().put("app","CasaNotify TV").put("version","2.0.1").put("api_version",2).put("device_id",prefs.deviceId()).put("device_name",prefs.config().optString("device_name")).put("tls_port",Prefs.SECURE_PORT).put("tls_fingerprint",fingerprint);}
     private static LanServer.Response json(JSONObject o){return LanServer.Response.json(200,o.toString());}
     private static String string(JSONObject o,String k,int n)throws JSONException{return Notice.string(o,k,"",n);}
     private static String cookieId(String cookie){if(cookie==null)return "";for(String part:cookie.split(";")){String[] p=part.trim().split("=",2);if(p.length==2&&p[0].equals("__Host-casanotify")&&p[1].matches("[A-Za-z0-9_-]{43}"))return p[1];}return "";}

@@ -1,5 +1,13 @@
 # Histórico
 
+## Aplicativo 2.0.1 — 26/09/2026
+
+- Corrige a autorização de assinatura da chave HTTPS no Android Keystore: ECDSA P-256 com `DIGEST_NONE`, necessário quando a pilha TLS já calculou o resumo da mensagem.
+- Implementa a seleção do certificado para conexões por `SSLSocket` e `SSLEngine` no mesmo gerenciador de chaves.
+- Gera uma nova identidade HTTPS local uma única vez ao atualizar da 2.0.0. Exige conferir o novo SHA-256 na TV e aprovar novamente nos clientes; mantém a conta, o autenticador e os demais dados do aplicativo.
+- Preserva a assinatura do APK e a API 2. Integração Home Assistant continua em 2.0.0.
+- Acrescenta testes com Conscrypt e TLS 1.2/1.3, além de orientações para `ERR_CONNECTION_CLOSED` e avisos do Play Protect. Não representa aprovação pelo Google ou teste em aparelho físico.
+
 ## 2.0.0 — 26/09/2026
 
 - HTTPS com certificado por dispositivo e validação por SHA-256 no Home Assistant/celular.

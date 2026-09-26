@@ -21,7 +21,7 @@ def main():
         if path.exists():shutil.rmtree(path)
         path.mkdir()
     run(tools/'aapt2','compile','--dir',source/'res','-o',build/'resources.zip')
-    run(tools/'aapt2','link','-I',android,'--manifest',build/'AndroidManifest.xml','--java',build/'gen','--min-sdk-version','26','--target-sdk-version','35','--version-code','3','--version-name','2.0.0','-o',build/'resources.apk',build/'resources.zip')
+    run(tools/'aapt2','link','-I',android,'--manifest',build/'AndroidManifest.xml','--java',build/'gen','--min-sdk-version','26','--target-sdk-version','35','--version-code','4','--version-name','2.0.1','-o',build/'resources.apk',build/'resources.zip')
     sources=list((source/'java').rglob('*.java'))+list((build/'gen').rglob('*.java'))
     compiler=[java/'bin/javac'] if (java/'bin/javac').exists() else [java/'bin/java','--module','jdk.compiler/com.sun.tools.javac.Main']
     run(*compiler,'-encoding','UTF-8','-source','8','-target','8','-classpath',android,'-d',build/'classes',*sources)
@@ -41,7 +41,7 @@ def main():
         run(java/'bin/keytool','-genkeypair','-keystore',root/'signing/casanotify-release.jks','-storetype','PKCS12','-storepass:env','CASANOTIFY_SIGN_PASS','-keypass:env','CASANOTIFY_SIGN_PASS','-alias','casanotify','-keyalg','RSA','-keysize','3072','-validity','10000','-dname','CN=CasaNotify TV, O=Personal Android App, C=BR')
         props.write_text('storeFile=signing/casanotify-release.jks\nstorePassword='+password+'\nkeyAlias=casanotify\nkeyPassword='+password+'\n');props.chmod(0o600)
     settings=dict(line.split('=',1) for line in props.read_text().splitlines() if '=' in line);env['CASANOTIFY_SIGN_PASS']=settings['storePassword']
-    output=pathlib.Path(a.output) if a.output else root/'build/CasaNotify-TV-2.0.0.apk';output.parent.mkdir(parents=True,exist_ok=True)
+    output=pathlib.Path(a.output) if a.output else root/'build/CasaNotify-TV-2.0.1.apk';output.parent.mkdir(parents=True,exist_ok=True)
     run(java/'bin/java','-jar',tools/'lib/apksigner.jar','sign','--ks',props.parent/settings['storeFile'],'--ks-key-alias',settings['keyAlias'],'--ks-pass','env:CASANOTIFY_SIGN_PASS','--min-sdk-version','26','--out',output,build/'aligned.apk')
     run(java/'bin/java','-jar',tools/'lib/apksigner.jar','verify','--verbose',output)
     run(tools/'zipalign','-c','4',output)

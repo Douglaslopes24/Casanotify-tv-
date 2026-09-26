@@ -1,8 +1,17 @@
-# Validação — CasaNotify TV 2.0.0
+# Validação — CasaNotify TV
 
 Data: 26/09/2026.
 
-## Executado com sucesso
+## Correção do aplicativo 2.0.1
+
+- **33 testes Java/JUnit aprovados**, incluindo o gerenciador `DeviceKeyManager` usado pelo app, seleção de certificado em `SSLEngine`, conexões HTTPS reais em localhost com os provedores JDK e Conscrypt, TLS 1.2 e TLS 1.3, cookies seguros e recusa de origem incorreta.
+- Compilação nativa com JDK 17 e SDK 35: versionCode 4, versionName 2.0.1, Android mínimo API 26 e target API 35. Assinatura v2/v3 e alinhamento verificados; certificado de assinatura igual ao das versões anteriores.
+- Migração planejada da identidade HTTPS para chave EC P-256 no Android Keystore, autorizando assinatura de resumo (`DIGEST_NONE`). Seleção de certificado implementada para socket e engine. Referências: [Android KeyGenParameterSpec.Builder](https://developer.android.com/reference/android/security/keystore/KeyGenParameterSpec.Builder#setDigests(java.lang.String...)) e [X509ExtendedKeyManager](https://developer.android.com/reference/javax/net/ssl/X509ExtendedKeyManager).
+- Integração Home Assistant e protocolo permanecem em 2.0.0/API 2. Os resultados Python e DOM abaixo são da validação anterior.
+
+Os testes usam uma chave de teste em software; não exercitam o Android Keystore da TV do usuário. Ainda é necessário validar a instalação, a migração do certificado e a conexão no aparelho. Não houve análise ou aprovação do APK pelo Play Protect. A captura recebida mostra `ERR_CONNECTION_CLOSED` no navegador; não contém a mensagem do Play Protect.
+
+## Versão 2.0.0 — executado com sucesso
 
 - APK nativo compilado com JDK 17 e ferramentas oficiais Android SDK 35; versionCode 3; versionName 2.0.0; Android mínimo 8/API 26; target API 35.
 - Assinatura APK v2/v3 e alinhamento verificados. Mesmo certificado da entrega 1.1.0.

@@ -26,7 +26,7 @@ public final class DiscoveryAdvertiser implements AutoCloseable {
         info.setPort(Prefs.PORT);
         info.setAttribute("id", id);
         info.setAttribute("api", "2");
-        info.setAttribute("version", "2.0.0");
+        info.setAttribute("version", "2.0.1");
         listener = new NsdManager.RegistrationListener() {
             public void onServiceRegistered(NsdServiceInfo service) {
                 registered = true;

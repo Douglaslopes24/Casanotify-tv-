@@ -1,14 +1,20 @@
-# Instalar CasaNotify TV 2.0.0
+# Instalar CasaNotify TV 2.0.1
 
 ## 1. Aplicativo na TV
 
-1. Baixe **CasaNotify-TV-2.0.0.apk** em `downloads` do repositório e transfira para seu Android TV/TV Box. Exige Android 8 ou posterior.
+1. Baixe **CasaNotify-TV-2.0.1.apk** em `downloads` do repositório e transfira para seu Android TV/TV Box. Exige Android 8 ou posterior.
 2. Autorize a instalação desse arquivo no Android. Instale sobre a versão anterior, sem desinstalar nem apagar os dados.
 3. Abra CasaNotify TV e leia/aceite os termos.
 4. Toque em **Autorizar sobreposição**, conceda a permissão do Android e volte.
 5. Toque em **Ativar receptor**. Mantenha a TV conectada à rede.
 
 O mesmo APK serve para TV e celular. No celular usado apenas para enviar notificações, não é necessário ativar o receptor nem a sobreposição.
+
+### Atualizar da 2.0.0
+
+A versão 2.0.1 corrige a configuração da chave HTTPS e cria um novo certificado local. A assinatura do APK continua a mesma; instale como atualização, sem apagar os dados. Conta, senha, autenticador, câmeras e personalizações continuam salvos.
+
+Após atualizar, ative o receptor e confira o novo SHA-256 em **Perfil → Segurança do painel / certificado**. No navegador, examine o novo certificado antes de aceitá-lo. No Home Assistant, conclua a reautenticação solicitada; se necessário, use **Reconfigurar** na integração existente, confirme o novo certificado e gere outro código na TV. Não exclua a integração. Nos celulares que enviam avisos, repita a vinculação e a conferência do certificado. A integração Home Assistant 2.0.0 continua compatível.
 
 ## 2. Criar login seguro no navegador
 
@@ -73,6 +79,9 @@ O botão **Abrir VPNs do Android** permite gerenciar VPNs já instaladas, confor
 
 ## Se algo não funcionar
 
+- **`ERR_CONNECTION_CLOSED` no navegador:** confirme APK 2.0.1 e receptor ativo. Digite o endereço completo, por exemplo `https://192.168.0.20:8766`, usando o IP atual mostrado na TV. A porta 8766 exige HTTPS; abrir `http://` nessa porta pode encerrar a conexão. Esse erro do navegador, sozinho, não identifica um bloqueio do Play Protect.
+- **VPN ativa e painel inacessível:** confira se a VPN permite acesso à rede local e se celular e TV conseguem alcançar o mesmo endereço. Não exponha as portas no roteador para corrigir esse acesso local.
+- **Google Play Protect:** mantenha a proteção ativa e registre a mensagem exata, indicando se aparece na TV ou no celular. O Google distingue pedido de verificação de um bloqueio de instalação; permissões sensíveis, incluindo acesso às notificações, podem motivar bloqueios em APKs baixados pela Internet. Se oferecer verificação, solicite a análise. Se indicar aplicativo nocivo ou bloqueado para proteção, interrompa a instalação e envie a captura para investigação. A assinatura do APK, esta correção HTTPS e o código publicado não comprovam aprovação pelo Google. [Orientação oficial](https://developers.google.com/android/play-protect/warning-dev-guidance?hl=pt-br).
 - Permissão de sobreposição: confirme em Configurações do Android → Aplicativos → Acesso especial.
 - TV não descoberta: confirme receptor ativo, mesma rede e ausência de isolamento de clientes. Tente IP manual.
 - Certificado mudou: confira na TV antes de vincular novamente. Não aprove valores desconhecidos.
