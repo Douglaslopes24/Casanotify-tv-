@@ -1,0 +1,8 @@
+action: casanotify_tv.send_notification
+target:
+  entity_id: notify.tv_da_sala_avisos
+data:
+  title: "Tudo conectado!"
+  message: "Este aviso veio do Home Assistant."
+  icon: check
+  duration: 10

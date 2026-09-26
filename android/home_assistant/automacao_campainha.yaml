@@ -1,0 +1,18 @@
+alias: TV - Campainha
+triggers:
+- trigger: state
+  entity_id: binary_sensor.campainha
+  to: 'on'
+actions:
+- action: casanotify_tv.send_notification
+  target:
+    entity_id: notify.tv_da_sala_avisos
+  data:
+    id: campainha
+    title: A campainha tocou
+    message: Tem uma visita esperando por você.
+    icon: bell
+    sound: true
+    urgent: true
+    duration: 20
+mode: single

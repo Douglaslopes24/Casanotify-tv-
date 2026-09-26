@@ -1,0 +1,16 @@
+alias: TV - Porta aberta
+triggers:
+- trigger: state
+  entity_id: binary_sensor.porta_entrada
+  to: 'on'
+actions:
+- action: casanotify_tv.send_notification
+  target:
+    entity_id: notify.tv_da_sala_avisos
+  data:
+    id: porta-entrada
+    title: A porta está aberta
+    message: Confira a entrada da casa.
+    icon: door
+    duration: 15
+mode: single

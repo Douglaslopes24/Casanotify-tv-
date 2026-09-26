@@ -1,0 +1,17 @@
+alias: TV - Boas-vindas
+triggers:
+- trigger: state
+  entity_id: person.seu_nome
+  to: home
+actions:
+- action: casanotify_tv.send_notification
+  target:
+    entity_id: notify.tv_da_sala_avisos
+  data:
+    title: Bem-vindo de volta!
+    message: '{{ trigger.to_state.attributes.friendly_name }} chegou em casa.'
+    icon: home
+    theme: lime
+    position: bottom_right
+    duration: 12
+mode: single

@@ -1,0 +1,40 @@
+{
+  "title": "CasaNotify TV",
+  "config": {
+    "flow_title": "{name}",
+    "step": {
+      "user": {
+        "title": "Connect CasaNotify TV",
+        "description": "Install APK 2.0.0, enable the receiver and enter the IPv4 shown on the TV. Discovery uses port 8765; commands use HTTPS port 8766.",
+        "data": {
+          "host": "TV IP address",
+          "port": "Port"
+        }
+      },
+      "pair": {
+        "title": "Pair {name}",
+        "description": "TV {name} at {host}. Open Profile → Panel security on the TV and compare its SHA-256 with the value below. Only confirm if they match. Generate a Home Assistant pairing code on the TV, then enter that code or the API key.\n\nSHA-256: {fingerprint}",
+        "data": {
+          "code": "Six-digit code",
+          "token": "API key (alternative to code)",
+          "confirm_fingerprint": "I compared the certificate on the TV and it matches"
+        }
+      }
+    },
+    "error": {
+      "invalid_host": "Enter an IPv4 address without a URL or port.",
+      "cannot_connect": "Cannot connect. Check the receiver and network.",
+      "unsupported_device": "Install CasaNotify TV 2.0.0 or later.",
+      "invalid_auth": "Invalid code/key or changed certificate. Verify the certificate and generate a new TV code.",
+      "choose_credential": "Enter either a six-digit code OR the API key.",
+      "confirm_fingerprint": "Compare and confirm the certificate on the TV before continuing."
+    },
+    "abort": {
+      "already_configured": "This TV is already configured.",
+      "wrong_device": "The device identity changed. Check the TV and IP address.",
+      "cannot_connect": "Cannot access the discovered TV.",
+      "reauth_successful": "TV paired again.",
+      "reconfigure_successful": "Connection updated."
+    }
+  }
+}

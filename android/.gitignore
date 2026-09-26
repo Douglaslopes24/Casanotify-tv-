@@ -1,0 +1,7 @@
+.gradle/
+**/build/
+local.properties
+keystore.properties
+signing/
+.idea/
+tests/node_modules/

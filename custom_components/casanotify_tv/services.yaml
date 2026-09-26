@@ -1,0 +1,233 @@
+send_notification:
+  name: Enviar aviso personalizado
+  description: Envia um aviso à TV. Campos omitidos usam os padrões salvos no aplicativo.
+    A pausa bloqueia inclusive urgentes.
+  target:
+    entity:
+      domain: notify
+      integration: casanotify_tv
+  fields:
+    message:
+      name: Mensagem
+      selector:
+        text:
+          multiline: true
+      required: true
+    title:
+      name: Título
+      selector:
+        text: {}
+    id:
+      name: Identificador do aviso
+      selector:
+        text: {}
+      description: Reutilize o mesmo ID para substituir um aviso desse evento.
+    image_url:
+      name: URL da imagem
+      selector:
+        text: {}
+      description: JPEG/PNG/WebP acessível pela TV, sem login. Não é vídeo ao vivo.
+    image_refresh:
+      name: Atualizar imagem a cada
+      selector:
+        number:
+          min: 0
+          max: 60
+          step: 1
+          mode: box
+          unit_of_measurement: s
+      description: Use 0 para desativar ou de 5 a 60 segundos.
+    theme:
+      name: Tema
+      selector:
+        select:
+          options:
+          - lime
+          - ocean
+          - ember
+          - rose
+          - paper
+    position:
+      name: Posição
+      selector:
+        select:
+          options:
+          - top_left
+          - top_center
+          - top_right
+          - center_left
+          - center
+          - center_right
+          - bottom_left
+          - bottom_center
+          - bottom_right
+    icon:
+      name: Ícone
+      selector:
+        select:
+          options:
+          - home
+          - bell
+          - door
+          - camera
+          - light
+          - check
+          - warning
+          - info
+          - sensor
+          - motion
+          - temperature
+          - humidity
+          - phone
+          - delivery
+          - chat
+          - battery
+          - wifi
+          - lock
+          - smoke
+          - water
+          - alarm
+    animation:
+      name: Animação
+      selector:
+        select:
+          options:
+          - slide
+          - fade
+          - none
+    duration:
+      name: Duração (segundos)
+      selector:
+        number:
+          min: 3
+          max: 120
+          step: 1
+          mode: box
+    width:
+      name: Largura (dp)
+      selector:
+        number:
+          min: 260
+          max: 800
+          step: 1
+          mode: box
+    text_size:
+      name: Tamanho do texto (sp)
+      selector:
+        number:
+          min: 14
+          max: 36
+          step: 1
+          mode: box
+    radius:
+      name: Cantos (dp)
+      selector:
+        number:
+          min: 0
+          max: 40
+          step: 1
+          mode: box
+    margin:
+      name: Margem (dp)
+      selector:
+        number:
+          min: 0
+          max: 100
+          step: 1
+          mode: box
+    volume:
+      name: Volume (%)
+      selector:
+        number:
+          min: 0
+          max: 100
+          step: 1
+          mode: box
+    opacity:
+      name: Opacidade
+      selector:
+        number:
+          min: 0.4
+          max: 0.8
+          step: 0.01
+          mode: box
+    background:
+      name: Cor de fundo
+      selector:
+        text: {}
+      description: 'Formato #RRGGBB, por exemplo #A3E635.'
+    text_color:
+      name: Cor do texto
+      selector:
+        text: {}
+      description: 'Formato #RRGGBB, por exemplo #A3E635.'
+    accent:
+      name: Cor de destaque
+      selector:
+        text: {}
+      description: 'Formato #RRGGBB, por exemplo #A3E635.'
+    sound:
+      name: Som
+      selector:
+        boolean: {}
+    speak:
+      name: Leitura em voz alta
+      selector:
+        boolean: {}
+    urgent:
+      name: Urgente (ignora horário silencioso)
+      selector:
+        boolean: {}
+    replace:
+      name: Substituir aviso atual
+      selector:
+        boolean: {}
+    progress:
+      name: Barra de progresso
+      selector:
+        boolean: {}
+    video_url:
+      name: Vídeo RTSP
+      description: Endereço RTSP acessível pela TV. Escolha vídeo, câmera salva ou
+        imagem. Prefira câmera salva para evitar senhas na automação.
+      selector:
+        text: {}
+    video_muted:
+      name: Vídeo sem áudio
+      selector:
+        boolean: {}
+    camera_id:
+      name: ID da câmera salva
+      description: Copie o ID em Câmeras RTSP no painel.
+      selector:
+        text: {}
+    tone:
+      name: Toque do alerta
+      selector:
+        select:
+          options:
+          - soft
+          - doorbell
+          - chime
+          - pulse
+          - alarm
+          - digital
+    backdrop:
+      name: Plano de fundo
+      selector:
+        select:
+          options:
+          - none
+          - custom
+clear_notification:
+  name: Limpar aviso
+  description: Limpa o aviso com este ID. Sem ID, limpa a tela e toda a fila.
+  target:
+    entity:
+      domain: notify
+      integration: casanotify_tv
+  fields:
+    id:
+      name: Identificador (opcional)
+      selector:
+        text: {}

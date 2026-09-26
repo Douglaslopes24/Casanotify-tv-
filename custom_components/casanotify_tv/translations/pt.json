@@ -1,0 +1,40 @@
+{
+  "title": "CasaNotify TV",
+  "config": {
+    "flow_title": "{name}",
+    "step": {
+      "user": {
+        "title": "Conectar CasaNotify TV",
+        "description": "Instale o APK 2.0.0, ative o receptor e informe o IPv4 mostrado na TV. A porta abaixo é a de descoberta (8765); os comandos usam HTTPS na porta 8766.",
+        "data": {
+          "host": "IP da TV",
+          "port": "Porta"
+        }
+      },
+      "pair": {
+        "title": "Vincular {name}",
+        "description": "TV {name} em {host}. Na TV, abra Perfil → Segurança do painel e compare o SHA-256 abaixo. Somente se for igual, confirme e gere um código em Vincular Home Assistant. Use o código de seis dígitos ou a chave da API.\n\nSHA-256: {fingerprint}",
+        "data": {
+          "code": "Código de seis números",
+          "token": "Chave de acesso (alternativa ao código)",
+          "confirm_fingerprint": "Conferi o certificado na TV e ele é igual"
+        }
+      }
+    },
+    "error": {
+      "invalid_host": "Informe o endereço IPv4, sem http:// nem porta.",
+      "cannot_connect": "Não foi possível conectar. Confira a rede e o receptor ativo.",
+      "unsupported_device": "Instale CasaNotify TV 2.0.0 ou posterior.",
+      "invalid_auth": "Código/chave inválido ou certificado alterado. Confira o certificado e gere um novo código na TV.",
+      "choose_credential": "Preencha somente o código de seis números OU a chave de acesso.",
+      "confirm_fingerprint": "Confira e confirme o certificado na TV antes de continuar."
+    },
+    "abort": {
+      "already_configured": "Esta TV já está configurada.",
+      "wrong_device": "O dispositivo respondeu com uma identificação diferente. Confira a TV e seu IP.",
+      "cannot_connect": "Não foi possível acessar a TV descoberta.",
+      "reauth_successful": "TV vinculada novamente.",
+      "reconfigure_successful": "Conexão atualizada."
+    }
+  }
+}

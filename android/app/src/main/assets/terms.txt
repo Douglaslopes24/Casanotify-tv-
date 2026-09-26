@@ -1,0 +1,33 @@
+CasaNotify TV — Termos de uso e privacidade
+Versão: 2026-09-26
+
+1. Sobre o aplicativo
+CasaNotify TV é um projeto independente, de código aberto, para avisos em Android TV e integração local com Home Assistant. Não é afiliado ao ASNO TV, ao WhatsApp, ao Google ou aos aplicativos de entrega. A licença MIT acompanha o código-fonte.
+
+2. Uso e controle
+Use apenas TVs, câmeras, contas e redes que você possui ou tem autorização para acessar. A TV pode mostrar mensagens na presença de outras pessoas; escolha conscientemente quais aplicativos e quais conteúdos serão enviados. Não use o aplicativo como único meio para avisos de emergência ou segurança.
+
+3. Conta e autenticação
+A conta do painel fica na própria TV. A senha é armazenada como derivação PBKDF2 com sal aleatório. O segredo do autenticador e os dados sensíveis são cifrados com uma chave do Android Keystore. Guarde o acesso ao seu autenticador. A redefinição da conta exige ação no aplicativo da TV. Códigos são gerados no autenticador; não enviamos SMS.
+
+4. HTTPS e conexão
+O painel usa HTTPS e certificado próprio da TV. No primeiro acesso, confira a impressão digital exibida no aplicativo. Home Assistant e o celular fixam o certificado aprovado. Não continue se a identificação divergir. O endereço HTTP serve somente à descoberta e ao encaminhamento para HTTPS.
+
+5. Notificações do celular
+O espelhamento é opcional, vem desativado e depende da permissão de acesso a notificações concedida nas configurações do Android. Somente os aplicativos marcados por você são enviados. Por padrão, o conteúdo é ocultado. Avisos em andamento, resumos de grupo e avisos marcados como secretos não são encaminhados; há um filtro adicional para códigos e senhas, que pode não reconhecer todo conteúdo sensível. O Android pode ocultar mensagens por suas próprias regras, que o app respeita. O envio pode ser desligado a qualquer momento e a permissão pode ser revogada no Android.
+
+6. Imagens e câmeras
+Imagens personalizadas são redimensionadas e recodificadas localmente. Câmeras RTSP dependem dos formatos e permissões do seu aparelho e da câmera. O protocolo RTSP pode transmitir sem criptografia; prefira sua rede privada ou uma VPN adequada. Endereços com credenciais ficam cifrados na TV. Não há gravação de vídeo pelo CasaNotify TV.
+
+7. VPN
+O recurso usa as funções de VPN do Android. Você fornece seu próprio servidor, provedor e credenciais. Não fornecemos serviço ou servidor VPN. A disponibilidade de IKEv2/IPsec depende do Android e do fabricante. A VPN pode alterar o acesso à rede local e à descoberta; configure-a conforme sua rede. As políticas de um provedor externo dependem desse provedor.
+
+8. Dados e exclusão
+Não há servidor de cadastro, publicidade nem telemetria neste aplicativo. Avisos são enviados entre os dispositivos configurados. O histórico da TV é temporário, com até 30 registros, e é apagado ao parar o receptor. Notificações do celular não são mantidas em um histórico persistente pelo CasaNotify. Câmeras e VPNs externas recebem as conexões que você configura. Exclua a conta, revogue celulares ou remova câmeras pelo aplicativo/painel. Limpar os dados do Android remove a configuração local, as credenciais e as imagens.
+
+9. Disponibilidade e suporte
+Esta versão precisa de validação no seu aparelho. Sobreposição, áudio, inicialização, rede e câmera podem variar conforme o fabricante. Atualizações podem exigir atualizar também a integração do Home Assistant. Consulte os registros de validação e abra uma ocorrência em https://github.com/Douglaslopes24/Casanotify-tv-/issues, sem publicar senhas, códigos ou imagens privadas.
+
+Ao aceitar, você confirma que leu estes termos e escolhe usar os recursos conforme as permissões que conceder. Esse aceite não substitui as autorizações separadas do Android.
+
+Obrigado por personalizar sua casa com o CasaNotify TV.
