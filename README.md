@@ -2,18 +2,20 @@
 
 Notificações personalizadas sobre a tela do Android TV, com integração própria para o Home Assistant e envio opcional de notificações do celular.
 
-**Aplicativo 2.0.1 · Integração 2.0.0 · Android 8+ · Home Assistant 2026.9+ · 37 entidades por TV**
+**Aplicativo 2.0.1 · Integração 2.0.1 · Android 8+ · Home Assistant 2026.9+ · 37 entidades por TV**
 
 ## Downloads
 
 - [Aplicativo Android 2.0.1 — TV e celular](downloads/CasaNotify-TV-2.0.1.apk)
-- [Integração Home Assistant 2.0.0](downloads/CasaNotify-TV-Integracao-HA-2.0.0.zip)
+- [Integração Home Assistant 2.0.1](downloads/CasaNotify-TV-Integracao-HA-2.0.1.zip)
 - [Código completo](https://github.com/Douglaslopes24/Casanotify-tv-/archive/refs/heads/main.zip)
 - [Instalação passo a passo](docs/INSTALACAO.md)
 
 Instale o APK sobre a versão anterior, sem apagar os dados. A assinatura foi preservada. Atualize também a integração: a versão 2 bloqueia comandos antigos por HTTP e pede nova confirmação do certificado da TV.
 
-**Correção 2.0.1:** ajusta a chave e a seleção do certificado HTTPS no Android. Ao atualizar da 2.0.0, o certificado local muda uma vez: compare o novo SHA-256 na TV e aprove novamente no navegador, Home Assistant e celulares vinculados. Login, senha, autenticador e personalizações são mantidos. A integração permanece na versão 2.0.0. [Orientações para conexão e Play Protect](docs/INSTALACAO.md#se-algo-não-funcionar).
+**Aplicativo 2.0.1:** ajusta a chave e a seleção do certificado HTTPS no Android. Ao atualizar da 2.0.0, o certificado local muda uma vez: compare o novo SHA-256 na TV e aprove novamente no navegador, Home Assistant e celulares vinculados. Login, senha, autenticador e personalizações são mantidos. [Orientações para conexão e Play Protect](docs/INSTALACAO.md#se-algo-não-funcionar).
+
+**Integração 2.0.1:** trata respostas incompletas da TV, permite diagnóstico antes da primeira conexão e esclarece a vinculação. A revisão verifica as 37 entidades, a atualização de IP sem duplicação e a aprovação de novo certificado sem mudar os IDs das entidades.
 
 ## Novidades
 
@@ -34,6 +36,8 @@ Instale o APK sobre a versão anterior, sem apagar os dados. A assinatura foi pr
 5. Gere o código em **Vincular Home Assistant** na TV e digite-o. As entidades serão criadas automaticamente.
 
 A descoberta exige mDNS acessível e receptor ativo. Ela não instala a integração nem dispensa o primeiro vínculo. O projeto é independente e não é uma integração oficial do Home Assistant, HACS ou ASNO TV.
+
+**O Home Assistant não exige cadastro no painel do navegador.** Use o código gerado em **Vincular Home Assistant** na TV ou a chave em **Ver chave do Home Assistant**. Senha do painel, código do autenticador e código de celular são diferentes.
 
 ## Entidades
 
@@ -63,4 +67,4 @@ Celulares recebem credenciais limitadas ao envio de avisos. O filtro adicional d
 
 Código Android em `android/`; integração em `custom_components/casanotify_tv/`. Não há chaves privadas de assinatura no repositório. Veja [compilação](android/README.md), [API](android/API.md), [testes e limites da validação](docs/VALIDACAO.md) e [atualizações](CHANGELOG.md).
 
-Validação da correção: 33 testes Java, incluindo TLS 1.2/1.3 com o gerenciador de certificados usado pelo app e os provedores JDK/Conscrypt. A integração e o painel têm os resultados da versão 2.0.0 registrados no relatório. APK compilado e assinatura verificada. **Ainda requer teste em TV física, câmera, celular e servidor VPN. Não há aprovação do Play Protect nesta entrega.**
+Validação da integração 2.0.1: **58 testes Python aprovados com Home Assistant 2026.9.3**, incluindo HTTPS real em localhost com certificados RSA e EC P-256, e análise Ruff. O aplicativo 2.0.1 tem 33 testes Java aprovados, APK compilado e assinatura verificada. [Resultados e limites](docs/VALIDACAO.md). **Ainda requer teste em TV física, câmera, celular e servidor VPN. Não há aprovação do Play Protect nesta entrega.**

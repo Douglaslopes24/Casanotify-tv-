@@ -1,6 +1,17 @@
 # Validação — CasaNotify TV
 
-Data: 26/09/2026.
+Última revisão da integração: 27/09/2026. Validação do aplicativo: 26/09/2026.
+
+## Integração Home Assistant 2.0.1
+
+- **58 testes Python aprovados com Home Assistant 2026.9.3 e Python 3.14.7**; análise Ruff aprovada.
+- Verificadas as 37 entidades, ações simples/avançadas, controles, descoberta, reconfiguração e recuperação de indisponibilidade com receptor simulado.
+- Novo certificado exige confirmação presencial; após a confirmação, os IDs das entidades são preservados. Alterar o IP não cria uma segunda entrada. Outra identidade de TV é recusada na reautenticação.
+- HTTPS real em localhost com certificados RSA e EC P-256. Um certificado diferente é recusado antes do envio da credencial.
+- Respostas sem nome/versão válidos geram erro controlado. Diagnóstico funciona antes da primeira conexão e não expõe IP, chave ou identidade.
+- Corrigida a falha do teste HTTPS no GitHub Actions das publicações anteriores: o marcador era aplicado antes de o plugin do Home Assistant bloquear sockets. O teste agora usa a fixture oficial `socket_enabled`, mantendo a lista de destinos locais permitidos. Não há acesso à TV real nesses testes.
+
+Comandos executados na raiz: `python -m pytest -o addopts= -q` e `python -m ruff check custom_components tests tools`. O APK não foi modificado nesta revisão; o ZIP da integração foi atualizado para 2.0.1.
 
 ## Correção do aplicativo 2.0.1
 

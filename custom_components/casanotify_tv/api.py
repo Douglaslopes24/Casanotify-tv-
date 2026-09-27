@@ -106,6 +106,9 @@ class CasaNotifyApi:
         if info.get("app") != "CasaNotify TV" or info.get("api_version") != 2:
             raise UnsupportedDevice("Unsupported app or API")
         try:
+            for field in ("device_name", "version"):
+                if not isinstance(info[field], str) or not info[field].strip():
+                    raise ValueError("Missing device name or version")
             uuid.UUID(info["device_id"])
             if not re.fullmatch(r"[0-9a-fA-F]{64}", info["tls_fingerprint"]):
                 raise ValueError("Missing TLS identity")

@@ -145,3 +145,68 @@ async def test_legacy_entry_requires_certificate_reapproval(hass, tv, mock_async
     assert old.state is ConfigEntryState.SETUP_ERROR
     flows = hass.config_entries.flow.async_progress()
     assert any(f["context"]["source"] == config_entries.SOURCE_REAUTH for f in flows)
+
+
+async def test_new_certificate_needs_confirmation_and_preserves_entities(hass, entry, tv):
+    from homeassistant.helpers import entity_registry as er
+
+    old_ids = {e.entity_id for e in er.async_entries_for_config_entry(er.async_get(hass), entry.entry_id)}
+    new_pin = "cd" * 32
+    tv["info"]["tls_fingerprint"] = new_pin
+    result = await hass.config_entries.flow.async_init(
+        "casanotify_tv",
+        context={"source": config_entries.SOURCE_REAUTH, "entry_id": entry.entry_id},
+        data=entry.data,
+    )
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], {"host": "192.168.1.50", "port": 8765}
+    )
+    assert result["description_placeholders"]["fingerprint"] == new_pin
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], {"code": "123456", "confirm_fingerprint": False}
+    )
+    assert result["errors"] == {"base": "confirm_fingerprint"}
+    assert entry.data["tls_fingerprint"] == FINGERPRINT
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], {"code": "123456", "confirm_fingerprint": True}
+    )
+    assert result["reason"] == "reauth_successful"
+    await hass.async_block_till_done()
+    assert entry.data["tls_fingerprint"] == new_pin
+    assert entry.runtime_data.api.fingerprint == new_pin
+    assert old_ids == {
+        e.entity_id for e in er.async_entries_for_config_entry(er.async_get(hass), entry.entry_id)
+    }
+
+
+async def test_reconfigure_changes_address_without_duplicate_device(hass, entry, tv):
+    result = await hass.config_entries.flow.async_init(
+        "casanotify_tv",
+        context={"source": config_entries.SOURCE_RECONFIGURE, "entry_id": entry.entry_id},
+    )
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], {"host": "192.168.1.80", "port": 8765}
+    )
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], {"token": TOKEN, "confirm_fingerprint": True}
+    )
+    assert result["reason"] == "reconfigure_successful"
+    await hass.async_block_till_done()
+    assert entry.data["host"] == "192.168.1.80"
+    assert entry.runtime_data.api.host == "192.168.1.80"
+    assert len(hass.config_entries.async_entries("casanotify_tv")) == 1
+
+
+async def test_reauthentication_rejects_different_tv(hass, entry, tv):
+    tv["info"]["device_id"] = "3737dc1e-385e-41f1-acb7-b10eaa4e2aec"
+    old_data = dict(entry.data)
+    result = await hass.config_entries.flow.async_init(
+        "casanotify_tv",
+        context={"source": config_entries.SOURCE_REAUTH, "entry_id": entry.entry_id},
+        data=entry.data,
+    )
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], {"host": "192.168.1.80", "port": 8765}
+    )
+    assert result["reason"] == "wrong_device"
+    assert dict(entry.data) == old_data

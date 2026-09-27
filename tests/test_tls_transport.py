@@ -9,7 +9,7 @@ import pytest
 from aiohttp import web
 from cryptography import x509
 from cryptography.hazmat.primitives import hashes, serialization
-from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.primitives.asymmetric import ec, rsa
 from cryptography.x509.oid import NameOID
 
 from custom_components.casanotify_tv.api import CasaNotifyApi, InvalidAuth
@@ -17,9 +17,14 @@ from custom_components.casanotify_tv.api import CasaNotifyApi, InvalidAuth
 from .conftest import DEVICE_ID, TOKEN
 
 
-@pytest.mark.enable_socket
-async def test_pin_prevents_credentials_reaching_changed_certificate(tmp_path):
-    key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+@pytest.mark.parametrize("key_type", ["rsa", "ec"])
+async def test_pin_prevents_credentials_reaching_changed_certificate(tmp_path, socket_enabled, key_type):
+    # The fixture runs after Home Assistant's socket guard; only localhost is allowed.
+    key = (
+        ec.generate_private_key(ec.SECP256R1())
+        if key_type == "ec"
+        else rsa.generate_private_key(public_exponent=65537, key_size=2048)
+    )
     name = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, "CasaNotify test")])
     cert = (
         x509.CertificateBuilder()
@@ -49,6 +54,8 @@ async def test_pin_prevents_credentials_reaching_changed_certificate(tmp_path):
             {
                 "app": "CasaNotify TV",
                 "api_version": 2,
+                "device_name": "TV de teste",
+                "version": "2.0.1",
                 "device_id": DEVICE_ID,
                 "tls_fingerprint": pin,
                 "tls_port": site._server.sockets[0].getsockname()[1],

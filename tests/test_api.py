@@ -13,6 +13,8 @@ DISCOVERY = "http://192.168.1.50:8765"
 IDENTITY = {
     "app": "CasaNotify TV",
     "api_version": 2,
+    "device_name": "TV de teste",
+    "version": "2.0.1",
     "device_id": DEVICE_ID,
     "tls_fingerprint": FINGERPRINT,
     "tls_port": 8766,
@@ -30,6 +32,24 @@ async def test_https_pair_and_http_discovery(aioclient_mock):
         assert client.token == TOKEN
         await client.status()
     assert aioclient_mock.call_count == 3
+
+
+@pytest.mark.parametrize("field", ["device_name", "version"])
+@pytest.mark.parametrize("value", [None, "", 123])
+async def test_incomplete_identity_has_controlled_error(aioclient_mock, field, value):
+    aioclient_mock.get(DISCOVERY + "/api/info", json=IDENTITY | {field: value})
+    async with aioclient_mock.create_session(asyncio.get_running_loop()) as session:
+        with pytest.raises(UnsupportedDevice):
+            await CasaNotifyApi(session, "192.168.1.50", 8765).info()
+
+
+async def test_missing_identity_field_has_controlled_error(aioclient_mock):
+    aioclient_mock.get(
+        DISCOVERY + "/api/info", json={k: v for k, v in IDENTITY.items() if k != "device_name"}
+    )
+    async with aioclient_mock.create_session(asyncio.get_running_loop()) as session:
+        with pytest.raises(UnsupportedDevice):
+            await CasaNotifyApi(session, "192.168.1.50", 8765).info()
 
 
 async def test_authentication_error(aioclient_mock):

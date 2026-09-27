@@ -126,6 +126,20 @@ async def test_diagnostics_redact_credentials_and_identity(hass, entry):
         assert secret not in data
 
 
+async def test_diagnostics_available_before_setup(hass):
+    from pytest_homeassistant_custom_component.common import MockConfigEntry
+
+    from custom_components.casanotify_tv.diagnostics import async_get_config_entry_diagnostics
+
+    entry = MockConfigEntry(domain="casanotify_tv", data={"token": "private", "host": "192.168.1.50"})
+    entry.add_to_hass(hass)
+    data = await async_get_config_entry_diagnostics(hass, entry)
+    assert data["available"] is False
+    assert data["app_version"] is None
+    assert "private" not in str(data)
+    assert "192.168.1.50" not in str(data)
+
+
 async def test_device_name_updates_in_registry(hass, entry, tv):
     from homeassistant.helpers import device_registry as dr
 

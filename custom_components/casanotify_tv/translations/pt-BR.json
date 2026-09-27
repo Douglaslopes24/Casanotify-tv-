@@ -5,15 +5,15 @@
     "step": {
       "user": {
         "title": "Conectar CasaNotify TV",
-        "description": "Instale o APK 2.0.0, ative o receptor e informe o IPv4 mostrado na TV. A porta abaixo é a de descoberta (8765); os comandos usam HTTPS na porta 8766.",
+        "description": "Use o APK 2.0.1 ou posterior e ative o receptor. Informe somente o IPv4 da TV, sem https:// nem porta. Mantenha 8765 para descoberta; o painel e os comandos usam HTTPS em 8766. Não é necessário criar um login no navegador para vincular ao Home Assistant.",
         "data": {
           "host": "IP da TV",
-          "port": "Porta"
+          "port": "Porta de descoberta (8765)"
         }
       },
       "pair": {
         "title": "Vincular {name}",
-        "description": "TV {name} em {host}. Na TV, abra Perfil → Segurança do painel e compare o SHA-256 abaixo. Somente se for igual, confirme e gere um código em Vincular Home Assistant. Use o código de seis dígitos ou a chave da API.\n\nSHA-256: {fingerprint}",
+        "description": "TV {name} em {host}. Na TV, abra Perfil → Segurança do painel e compare o SHA-256 abaixo. Confirme somente se for igual. Depois gere um código em Vincular Home Assistant. Use esse código ou a chave exibida em Ver chave do Home Assistant. Não use senha do navegador, código do autenticador ou código de celular.\n\nSHA-256: {fingerprint}",
         "data": {
           "code": "Código de seis números",
           "token": "Chave de acesso (alternativa ao código)",
@@ -24,7 +24,7 @@
     "error": {
       "invalid_host": "Informe o endereço IPv4, sem http:// nem porta.",
       "cannot_connect": "Não foi possível conectar. Confira a rede e o receptor ativo.",
-      "unsupported_device": "Instale CasaNotify TV 2.0.0 ou posterior.",
+      "unsupported_device": "Confira o IP da TV e atualize o CasaNotify TV para 2.0.1 ou posterior. O dispositivo não respondeu com uma identificação válida.",
       "invalid_auth": "Código/chave inválido ou certificado alterado. Confira o certificado e gere um novo código na TV.",
       "choose_credential": "Preencha somente o código de seis números OU a chave de acesso.",
       "confirm_fingerprint": "Confira e confirme o certificado na TV antes de continuar."

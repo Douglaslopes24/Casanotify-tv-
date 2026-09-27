@@ -14,7 +14,7 @@ O mesmo APK serve para TV e celular. No celular usado apenas para enviar notific
 
 A versão 2.0.1 corrige a configuração da chave HTTPS e cria um novo certificado local. A assinatura do APK continua a mesma; instale como atualização, sem apagar os dados. Conta, senha, autenticador, câmeras e personalizações continuam salvos.
 
-Após atualizar, ative o receptor e confira o novo SHA-256 em **Perfil → Segurança do painel / certificado**. No navegador, examine o novo certificado antes de aceitá-lo. No Home Assistant, conclua a reautenticação solicitada; se necessário, use **Reconfigurar** na integração existente, confirme o novo certificado e gere outro código na TV. Não exclua a integração. Nos celulares que enviam avisos, repita a vinculação e a conferência do certificado. A integração Home Assistant 2.0.0 continua compatível.
+Após atualizar, ative o receptor e confira o novo SHA-256 em **Perfil → Segurança do painel / certificado**. No navegador, examine o novo certificado antes de aceitá-lo. No Home Assistant, conclua a reautenticação solicitada; se necessário, use **Reconfigurar** na integração existente, confirme o novo certificado e gere outro código na TV. Não exclua a integração. Nos celulares que enviam avisos, repita a vinculação e a conferência do certificado. Use o pacote revisado da integração Home Assistant 2.0.1.
 
 ## 2. Criar login seguro no navegador
 
@@ -30,6 +30,8 @@ A conta fica na TV. Não há cadastro em nuvem nem SMS. Um código usado não po
 
 ## 3. Home Assistant
 
+Exige Home Assistant 2026.9 ou posterior. **Não é necessário criar usuário, senha ou autenticador no navegador para vincular a TV ao Home Assistant.** O código correto é o gerado em **Vincular Home Assistant** na TV; a alternativa é a chave exibida em **Ver chave do Home Assistant**.
+
 ### Pelo HACS
 
 1. HACS → menu → **Repositórios personalizados**.
@@ -40,9 +42,15 @@ Não é necessário que o projeto esteja no catálogo padrão do HACS para adici
 
 ### Pelo ZIP
 
-1. Extraia **CasaNotify-TV-Integracao-HA-2.0.0.zip**.
+1. Extraia **CasaNotify-TV-Integracao-HA-2.0.1.zip**.
 2. Copie a pasta `custom_components/casanotify_tv` para `/config/custom_components/casanotify_tv` do Home Assistant, substituindo a versão antiga.
 3. Confira que existe `/config/custom_components/casanotify_tv/manifest.json` e reinicie o Home Assistant.
+
+### Atualizar uma integração já instalada
+
+No HACS, abra CasaNotify TV e baixe novamente a versão do repositório. Pela instalação manual, substitua a pasta pelo ZIP 2.0.1. Reinicie o Home Assistant e mantenha a integração existente para preservar entidades e automações. O `manifest.json` atualizado deve indicar `"version": "2.0.1"`.
+
+Se a atualização do APK pedir nova autenticação, confira o certificado na TV e siga a solicitação do Home Assistant. Não apague a integração nem crie uma segunda TV para resolver a troca de certificado.
 
 ### Vinculação e atualização da versão 1.x
 

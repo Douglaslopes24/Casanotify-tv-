@@ -5,15 +5,15 @@
     "step": {
       "user": {
         "title": "Connect CasaNotify TV",
-        "description": "Install APK 2.0.0, enable the receiver and enter the IPv4 shown on the TV. Discovery uses port 8765; commands use HTTPS port 8766.",
+        "description": "Use APK 2.0.1 or later and enable the receiver. Enter only the TV IPv4 address, without https:// or a port. Keep discovery port 8765; the panel and commands use HTTPS on 8766. A browser account is not required to pair Home Assistant.",
         "data": {
           "host": "TV IP address",
-          "port": "Port"
+          "port": "Discovery port (8765)"
         }
       },
       "pair": {
         "title": "Pair {name}",
-        "description": "TV {name} at {host}. Open Profile → Panel security on the TV and compare its SHA-256 with the value below. Only confirm if they match. Generate a Home Assistant pairing code on the TV, then enter that code or the API key.\n\nSHA-256: {fingerprint}",
+        "description": "TV {name} at {host}. Open Profile → Panel security on the TV and compare its SHA-256 with the value below. Only confirm if they match. Generate a code in Pair Home Assistant on the TV, or use the key in Show Home Assistant key. Do not enter a browser password, authenticator code or phone pairing code.\n\nSHA-256: {fingerprint}",
         "data": {
           "code": "Six-digit code",
           "token": "API key (alternative to code)",
@@ -24,7 +24,7 @@
     "error": {
       "invalid_host": "Enter an IPv4 address without a URL or port.",
       "cannot_connect": "Cannot connect. Check the receiver and network.",
-      "unsupported_device": "Install CasaNotify TV 2.0.0 or later.",
+      "unsupported_device": "Check the TV IP and update CasaNotify TV to 2.0.1 or later. The device did not return a valid identity.",
       "invalid_auth": "Invalid code/key or changed certificate. Verify the certificate and generate a new TV code.",
       "choose_credential": "Enter either a six-digit code OR the API key.",
       "confirm_fingerprint": "Compare and confirm the certificate on the TV before continuing."

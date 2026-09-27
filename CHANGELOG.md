@@ -1,5 +1,14 @@
 # Histórico
 
+## Integração Home Assistant 2.0.1 — 27/09/2026
+
+- Respostas sem nome ou versão válidos agora produzem um erro tratado, evitando falhas inesperadas na configuração e nas entidades.
+- Diagnóstico pode ser consultado antes de uma conexão bem-sucedida, mantendo credenciais e IPs fora do relatório.
+- Instruções de vinculação distinguem o código/chave do Home Assistant do login e autenticador do navegador e deixam explícita a porta de descoberta 8765.
+- Corrige a configuração do teste de HTTPS no GitHub Actions: a fixture de sockets é ativada após a preparação dos testes do Home Assistant, com conexões restritas a localhost.
+- 58 testes aprovados localmente, incluindo as 37 entidades, reconfiguração de IP, confirmação de novo certificado preservando entidades e transporte HTTPS com certificados RSA/EC P-256.
+- Pacote ZIP republicado. API 2 e aplicativo Android 2.0.1 preservados.
+
 ## Aplicativo 2.0.1 — 26/09/2026
 
 - Corrige a autorização de assinatura da chave HTTPS no Android Keystore: ECDSA P-256 com `DIGEST_NONE`, necessário quando a pilha TLS já calculou o resumo da mensagem.
