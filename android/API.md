@@ -1,16 +1,16 @@
-# API local 2.0
+# API local 2 · Aplicativos 2.1.0
 
 Base autenticada: `https://IP_DA_TV:8766`. Host numérico e porta obrigatórios. JSON UTF-8, `Content-Type: application/json`, `Content-Length`. Sem CORS nem redirecionamento de credenciais.
 
-`http://IP_DA_TV:8765/api/info` é somente descoberta pública. Retorna `app`, `version`, `api_version: 2`, UUID, nome, `tls_port` e `tls_fingerprint` SHA-256. Compare fisicamente o certificado antes de enviar código/chave por HTTPS. O HTTP não aceita comandos; retorna 426. Não use `verify_ssl: false` como substituto da fixação do certificado.
+`http://IP_DA_TV:8765/api/info` é somente descoberta pública. Retorna `app`, `version`, `api_version: 2`, UUID, nome, `control_protocol: 1`, `auth_mode: "password"`, `tls_port` e `tls_fingerprint` SHA-256. Compare fisicamente o certificado antes de enviar código/chave por HTTPS. O HTTP não aceita comandos; retorna 426. Não use `verify_ssl: false` como substituto da fixação do certificado.
 
 ## Autenticação
 
-- Navegador: `/auth/state`, `/auth/register` com código físico de escopo `setup`, nome, usuário, senha, aceite e versão dos termos. `/auth/confirm` recebe `pending_id` e primeiro TOTP. `/auth/login` recebe usuário, senha e TOTP.
-- Login retorna perfil e token CSRF, com cookie `__Host-casanotify` Secure/HttpOnly/SameSite=Strict. POSTs de sessão exigem `X-CasaNotify-CSRF`. `/auth/session` restaura perfil/CSRF; `/auth/logout` revoga a sessão; `/auth/password` exige senha atual, nova senha e TOTP novo; `/auth/profile` altera o nome.
+- Conta de controle: `/auth/state`, `/auth/register` com código físico de escopo `setup`, nome, usuário, senha, aceite e versão dos termos. O cadastro já cria a sessão. `/auth/login` recebe somente `username` e `password`. `/auth/confirm` foi removido; não há TOTP.
+- Login retorna perfil e token CSRF, com cookie `__Host-casanotify` Secure/HttpOnly/SameSite=Strict. POSTs de sessão exigem `X-CasaNotify-CSRF`. `/auth/session` restaura perfil/CSRF; `/auth/logout` revoga a sessão; `/auth/password` exige `current` (senha atual) e `password` (nova senha); `/auth/profile` altera o nome.
 - Home Assistant: `/api/pair` com `code` e `client: ha` retorna credencial de administração. Use `Authorization: Bearer CHAVE` somente por HTTPS com certificado aprovado.
 - Celular: `/api/pair` com código de escopo `phone`, `client: phone` e nome. Credencial separada, somente para enviar título/mensagem. Até 10 celulares e 30 avisos/minuto por celular. Revogação pelo proprietário.
-- Códigos de pareamento: seis dígitos, dois minutos, uma vez, cinco tentativas. Não substituem códigos TOTP de login.
+- Códigos de pareamento: seis dígitos, dois minutos, uma vez, cinco tentativas. São usados no cadastro ou vínculo inicial, nunca como segundo fator de login.
 
 ## Rotas protegidas
 
@@ -37,3 +37,11 @@ Campos de aviso e limites estão em `Notice.java` e no esquema da ação do Home
 ## Descoberta
 
 Serviço `_casanotify._tcp.local.` na porta 8765, TXT `id`, `api`, `version`. A identidade, o certificado local e o vínculo são preservados em atualização sem apagar dados. Não publique a porta na Internet. O SHA público anunciado não é confiável por si só: precisa de aprovação presencial no primeiro vínculo.
+
+## Aplicativo de controle
+
+A WebView carrega somente `index.html`, `panel.css`, `panel.js` e `control.js` empacotados, na origem local `https://app.casanotify.local`. O canal `WebMessagePort` é entregue especificamente a essa origem. CSP bloqueia frames, scripts externos, formulários de navegação e conexões web. Arquivos, content URLs, cookies WebView e acesso de rede WebView são desativados.
+
+`ControlClient` limita métodos, caminhos e tamanhos. O cookie é guardado somente em memória no transporte Android e não é entregue ao JavaScript. HTTPS fixa o certificado aprovado; não há tratamento que ignore erros TLS nem redirecionamentos. A descoberta HTTP fornece somente identificação, que precisa ser comparada fisicamente com a TV.
+
+Os comandos nativos adicionais são copiar texto e escolher imagem pelo seletor Android. Imagens selecionadas são limitadas, decodificadas e recodificadas antes de entrar no editor. O painel HTTPS anterior permanece disponível para compatibilidade, mas não é necessário para cadastro ou ajustes no novo fluxo.

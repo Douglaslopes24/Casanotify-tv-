@@ -3,11 +3,24 @@
 Usage: python3 tools/build_apk.py --sdk /path/to/Android/Sdk --jdk /path/to/jdk
 Requires platform 35, build-tools 35.0.0; no runtime third-party dependencies.
 """
-import argparse, os, pathlib, secrets, shutil, subprocess, zipfile, xml.etree.ElementTree as ET
+import argparse, copy, os, pathlib, secrets, shutil, subprocess, zipfile, xml.etree.ElementTree as ET
+
+def variant_manifest(source, variant):
+    """Combine shared declarations and one additive device manifest, without permissions from the other."""
+    manifest=ET.parse(source/'AndroidManifest.xml');app=manifest.getroot().find('application')
+    extra=ET.parse(source.parent/variant/'AndroidManifest.xml').getroot()
+    for element in extra:
+        if element.tag=='application':
+            app.attrib.update(element.attrib)
+            for child in element:app.append(copy.deepcopy(child))
+        else:manifest.getroot().insert(list(manifest.getroot()).index(app),copy.deepcopy(element))
+    manifest.getroot().set('package','br.com.casanotify.tv')
+    return manifest
 
 def main():
     p=argparse.ArgumentParser();p.add_argument('--sdk',default=os.getenv('ANDROID_HOME'));p.add_argument('--jdk',default=os.getenv('JAVA_HOME'));p.add_argument('--android-jar');p.add_argument('--build-tools');p.add_argument('--output');p.add_argument('--signing-properties')
-    a=p.parse_args();root=pathlib.Path(__file__).resolve().parents[1];build=root/'build/manual';build.mkdir(parents=True,exist_ok=True)
+    p.add_argument('--variant',choices=['tv','control','phone'],default='tv',help='tv: receptor sem acesso a notificações de outros apps; control: controle do celular; phone: controle com espelhamento opcional')
+    a=p.parse_args();root=pathlib.Path(__file__).resolve().parents[1];build=root/'build/manual'/a.variant;build.mkdir(parents=True,exist_ok=True)
     if not a.jdk:p.error('Informe --jdk ou JAVA_HOME.')
     if not a.sdk and not(a.android_jar and a.build_tools):p.error('Informe --sdk ou --android-jar e --build-tools.')
     java=pathlib.Path(a.jdk);sdk=pathlib.Path(a.sdk) if a.sdk else None
@@ -15,14 +28,15 @@ def main():
     tools=pathlib.Path(a.build_tools) if a.build_tools else sdk/'build-tools/35.0.0'
     env=dict(os.environ,JAVA_HOME=str(java));env['PATH']=str(java/'bin')+os.pathsep+env.get('PATH','')
     def run(*args):subprocess.run([str(x) for x in args],check=True,env=env,cwd=root)
-    source=root/'app/src/main';manifest=ET.parse(source/'AndroidManifest.xml');manifest.getroot().set('package','br.com.casanotify.tv');ET.register_namespace('android','http://schemas.android.com/apk/res/android');manifest.write(build/'AndroidManifest.xml',encoding='utf-8',xml_declaration=True)
+    source=root/'app/src/main';manifest=variant_manifest(source,a.variant);ET.register_namespace('android','http://schemas.android.com/apk/res/android');manifest.write(build/'AndroidManifest.xml',encoding='utf-8',xml_declaration=True)
     for name in ['gen','classes','dex']:
         path=build/name
         if path.exists():shutil.rmtree(path)
         path.mkdir()
     run(tools/'aapt2','compile','--dir',source/'res','-o',build/'resources.zip')
-    run(tools/'aapt2','link','-I',android,'--manifest',build/'AndroidManifest.xml','--java',build/'gen','--min-sdk-version','26','--target-sdk-version','35','--version-code','4','--version-name','2.0.1','-o',build/'resources.apk',build/'resources.zip')
-    sources=list((source/'java').rglob('*.java'))+list((build/'gen').rglob('*.java'))
+    run(tools/'aapt2','link','-I',android,'--manifest',build/'AndroidManifest.xml','--java',build/'gen','--min-sdk-version','26','--target-sdk-version','35','--version-code','6','--version-name','2.1.0','-o',build/'resources.apk',build/'resources.zip')
+    sources=list((source/'java').rglob('*.java'))+list((source.parent/a.variant/'java').rglob('*.java'))+list((build/'gen').rglob('*.java'))
+    if a.variant in ('control','phone'):sources+=list((source.parent/'companion/java').rglob('*.java'))
     compiler=[java/'bin/javac'] if (java/'bin/javac').exists() else [java/'bin/java','--module','jdk.compiler/com.sun.tools.javac.Main']
     run(*compiler,'-encoding','UTF-8','-source','8','-target','8','-classpath',android,'-d',build/'classes',*sources)
     with zipfile.ZipFile(build/'classes.jar','w',zipfile.ZIP_DEFLATED) as z:
@@ -41,7 +55,8 @@ def main():
         run(java/'bin/keytool','-genkeypair','-keystore',root/'signing/casanotify-release.jks','-storetype','PKCS12','-storepass:env','CASANOTIFY_SIGN_PASS','-keypass:env','CASANOTIFY_SIGN_PASS','-alias','casanotify','-keyalg','RSA','-keysize','3072','-validity','10000','-dname','CN=CasaNotify TV, O=Personal Android App, C=BR')
         props.write_text('storeFile=signing/casanotify-release.jks\nstorePassword='+password+'\nkeyAlias=casanotify\nkeyPassword='+password+'\n');props.chmod(0o600)
     settings=dict(line.split('=',1) for line in props.read_text().splitlines() if '=' in line);env['CASANOTIFY_SIGN_PASS']=settings['storePassword']
-    output=pathlib.Path(a.output) if a.output else root/'build/CasaNotify-TV-2.0.1.apk';output.parent.mkdir(parents=True,exist_ok=True)
+    label={'tv':'TV','control':'Controle','phone':'Celular'}[a.variant]
+    output=pathlib.Path(a.output) if a.output else root/f'build/CasaNotify-{label}-2.1.0.apk';output.parent.mkdir(parents=True,exist_ok=True)
     run(java/'bin/java','-jar',tools/'lib/apksigner.jar','sign','--ks',props.parent/settings['storeFile'],'--ks-key-alias',settings['keyAlias'],'--ks-pass','env:CASANOTIFY_SIGN_PASS','--min-sdk-version','26','--out',output,build/'aligned.apk')
     run(java/'bin/java','-jar',tools/'lib/apksigner.jar','verify','--verbose',output)
     run(tools/'zipalign','-c','4',output)

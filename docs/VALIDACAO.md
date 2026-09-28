@@ -1,6 +1,16 @@
 # Validação — CasaNotify TV
 
-Última revisão da integração: 27/09/2026. Validação do aplicativo: 26/09/2026.
+Última revisão da integração e dos aplicativos: 27/09/2026.
+
+## Aplicativos 2.1.0 — controle pelo app e login sem TOTP
+
+- **37 testes Java/JUnit aprovados:** protocolo, senha, consentimento, migração de conta TOTP existente sem perder senha ou bloqueio, sessões/revogação, escopos de vínculo, RTSP e filtro de conteúdo. Inclui HTTPS real: certificado correto permite login e certificado diferente impede a chegada da senha ao servidor.
+- **DOM aprovado nos dois transportes:** painel e app com canal nativo simulado, sem `fetch` de rede. Cadastro direto, login só com senha, CSRF, câmeras, temas, toques, ícones, perfil, histórico, revogação e troca de senha.
+- Três APKs: 2.1.0, versionCode 6, min API 26 e target API 35, compilação com JDK 17/SDK 35, assinatura v2/v3 e alinhamento conferidos. Certificado de assinatura original preservado.
+- TV e Controle sem serviço nem classe `NotificationListenerService`; Celular mantém esse serviço explicitamente. Controle e Celular não declaram receptor/boot/sobreposição.
+- Sem mudança no contrato Home Assistant/API 2 nem na identidade HTTPS introduzida em 2.0.1.
+- O teste visual Chromium não pôde iniciar nesta execução por ausência do executável. Os testes DOM não validam renderização, foco, seletor Android ou comportamento de WebView real.
+- **Não validado em aparelho físico/emulador nesta sessão:** instalação/atualização, abertura WebView e canal Android, sobreposição, seleção de imagem, codecs RTSP, VPN, listener e resposta real do Play Protect. Não há afirmação de aprovação do Google ou remoção garantida do bloqueio.
 
 ## Integração Home Assistant 2.0.1
 
@@ -39,4 +49,4 @@ Não houve execução do APK em TV física, emulador Android ou celular. Android
 
 O teste visual Chromium foi preparado, mas não executou: o ambiente recusou a criação do socket exigido para iniciar o navegador. Portanto, não há aprovação visual por captura de tela, nem teste real do editor de imagem em navegador nesta entrega. O script opcional está em `android/tests/panel.browser.cjs` para execução em um computador com Chromium suportado.
 
-Passar nos testes não equivale a auditoria independente de segurança nem a compatibilidade universal. VPN integrada exige servidor próprio e Android 11+ com IPsec. Autenticação móvel implementada é TOTP, não SMS. Edição de imagem altera logo interno/fundo, não o ícone instalado no launcher.
+Passar nos testes não equivale a auditoria independente de segurança nem a compatibilidade universal. VPN integrada exige servidor próprio e Android 11+ com IPsec. Na 2.1.0, a autenticação do controle usa usuário e senha, sem TOTP ou SMS. Os registros de versões anteriores abaixo/acima descrevem o comportamento daquelas versões. Edição de imagem altera logo interno/fundo, não o ícone instalado no launcher.

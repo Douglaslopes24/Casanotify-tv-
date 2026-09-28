@@ -33,15 +33,5 @@ public final class LocalTls {
         server=SSLContext.getInstance("TLS");server.init(new KeyManager[]{manager},null,new SecureRandom());return server;
     }
     public static String fingerprint()throws Exception{server();return AuthCrypto.hex(MessageDigest.getInstance("SHA-256").digest(certificate.getEncoded()));}
-    public static SSLSocketFactory pinned(String fingerprint)throws Exception{
-        if(!fingerprint.matches("[0-9a-fA-F]{64}"))throw new IllegalArgumentException("Impressão digital inválida.");
-        TrustManager[] managers={new X509TrustManager(){
-            public X509Certificate[] getAcceptedIssuers(){return new X509Certificate[0];}
-            public void checkClientTrusted(X509Certificate[] chain,String auth)throws java.security.cert.CertificateException{throw new java.security.cert.CertificateException("Client certificates unsupported");}
-            public void checkServerTrusted(X509Certificate[] chain,String auth)throws java.security.cert.CertificateException{
-                try{if(chain.length==0)throw new Exception();chain[0].checkValidity();String actual=AuthCrypto.hex(MessageDigest.getInstance("SHA-256").digest(chain[0].getEncoded()));if(!AuthCrypto.same(fingerprint.toLowerCase(Locale.ROOT),actual))throw new Exception();}
-                catch(Exception e){throw new java.security.cert.CertificateException("O certificado da TV não corresponde ao certificado aprovado.");}
-            }
-        }};SSLContext context=SSLContext.getInstance("TLS");context.init(null,managers,new SecureRandom());return context.getSocketFactory();
-    }
+    public static SSLSocketFactory pinned(String fingerprint)throws Exception{return CertificatePin.socketFactory(fingerprint);}
 }

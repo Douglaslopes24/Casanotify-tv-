@@ -1,36 +1,46 @@
-# Instalar CasaNotify TV 2.0.1
+# Instalar CasaNotify 2.1.0
 
-## 1. Aplicativo na TV
+## 1. Preparar a TV
 
-1. Baixe **CasaNotify-TV-2.0.1.apk** em `downloads` do repositório e transfira para seu Android TV/TV Box. Exige Android 8 ou posterior.
-2. Autorize a instalação desse arquivo no Android. Instale sobre a versão anterior, sem desinstalar nem apagar os dados.
-3. Abra CasaNotify TV e leia/aceite os termos.
-4. Toque em **Autorizar sobreposição**, conceda a permissão do Android e volte.
-5. Toque em **Ativar receptor**. Mantenha a TV conectada à rede.
+1. Instale **CasaNotify-TV-2.1.0.apk** no Android TV/TV Box (Android 8+), como atualização sobre a versão anterior, sem apagar dados.
+2. Abra o app, leia e aceite os termos.
+3. Autorize **Sobreposição** nas configurações do Android e volte ao app.
+4. Toque em **Ativar receptor** e anote o **IP para o app de controle**.
 
-O mesmo APK serve para TV e celular. No celular usado apenas para enviar notificações, não é necessário ativar o receptor nem a sobreposição.
+Permissões do sistema, instalação e ativação do receptor exigem ação na própria TV. Depois, faça os ajustes de avisos pelo celular. TVs Samsung Tizen e LG webOS precisam de um dispositivo Android externo.
 
-### Atualizar da 2.0.0
+## 2. Primeiro acesso e ajustes pelo celular
 
-A versão 2.0.1 corrige a configuração da chave HTTPS e cria um novo certificado local. A assinatura do APK continua a mesma; instale como atualização, sem apagar os dados. Conta, senha, autenticador, câmeras e personalizações continuam salvos.
+1. Instale **CasaNotify-Controle-2.1.0.apk** e abra **CasaNotify Controle**.
+2. Informe o IP da TV, sem `https://` nem porta. Os aparelhos precisam se alcançar pela rede local ou VPN.
+3. Na TV, abra **Perfil → Identificação segura da TV**. Compare todos os grupos SHA-256 com os exibidos no celular e confirme apenas se forem iguais.
+4. Se já tem conta, entre com o usuário e a senha existentes. **Não há segundo fator nem código de autenticador.**
+5. No primeiro cadastro, gere **Perfil → Gerar código para criar conta** na TV. Informe esse código no app de controle, seu nome, usuário e senha de 12–128 caracteres. Leia e aceite os termos. O código vale dois minutos e serve uma vez para aprovar a criação da conta; não é pedido no login.
+6. O app mostra o agradecimento com seu nome e abre os ajustes: **Criar aviso, Aparência, Home Assistant, Câmeras RTSP, Minha marca, Conta e celulares, Atividade**.
 
-Após atualizar, ative o receptor e confira o novo SHA-256 em **Perfil → Segurança do painel / certificado**. No navegador, examine o novo certificado antes de aceitá-lo. No Home Assistant, conclua a reautenticação solicitada; se necessário, use **Reconfigurar** na integração existente, confirme o novo certificado e gere outro código na TV. Não exclua a integração. Nos celulares que enviam avisos, repita a vinculação e a conferência do certificado. Use o pacote revisado da integração Home Assistant 2.0.1.
+Nenhuma dessas etapas abre Chrome ou outro navegador. O menu superior permite trocar a TV, ler termos, configurar a VPN do celular e consultar o espelhamento opcional. Fotos são escolhidas pelo seletor de imagens do Android. O app não pede acesso geral aos arquivos. A câmera RTSP é reproduzida na TV, não na prévia do controle.
 
-## 2. Criar login seguro no navegador
+A identificação da TV fica cifrada no celular. A senha não é salva no controle e a sessão fica apenas na memória: ao fechar/recriar o app, pode ser necessário entrar novamente. Cinco falhas de login bloqueiam tentativas por cinco minutos. Se esquecer a senha, redefina a conta presencialmente na TV; os dados de câmeras e o vínculo do Home Assistant permanecem.
 
-1. Na TV, abra **Perfil, tema, imagens e segurança → Segurança do painel** e consulte o SHA-256 do certificado.
-2. No celular ou computador da mesma rede, abra exatamente o endereço `https://IP_DA_TV:8766` mostrado no app.
-3. Por ser um certificado local, o navegador pode mostrar um aviso. Veja os detalhes do certificado e compare o SHA-256 completo com o da TV. Aceite a exceção somente se for igual. Se seu navegador não permitir conferir ou aceitar o certificado, use outro navegador que ofereça essa opção. Não desative globalmente a validação de certificados.
-4. Na TV, gere o **código para criar conta**. Ele vale por dois minutos, uma vez, e é diferente do código de Home Assistant/celular.
-5. No painel, informe o código, seu nome, usuário e uma senha de 12 a 128 caracteres. Leia e aceite os termos.
-6. No aplicativo autenticador de sua preferência, adicione a chave mostrada, com código baseado em tempo: TOTP, seis dígitos, 30 segundos.
-7. Digite o código gerado para concluir. O agradecimento usa o nome escolhido.
+### Qual APK instalar
 
-A conta fica na TV. Não há cadastro em nuvem nem SMS. Um código usado não pode ser reutilizado: aguarde o próximo. Mantenha data/hora automáticas na TV e no celular. Se perder senha ou autenticador, redefina a conta presencialmente em Perfil na TV e faça outro cadastro. Isso encerra sessões do navegador. Não muda automaticamente a chave do Home Assistant nem revoga celulares.
+| Edição | Aparelho | Função |
+|---|---|---|
+| TV | TV/TV Box | Receptor dos avisos e servidor local |
+| Controle | Celular | Cadastro, login e todos os ajustes do painel; não lê notificações de outros apps |
+| Celular (opcional) | Celular | Tudo do Controle e espelhamento de notificações escolhidas, mediante autorização do Android |
+
+As edições usam o mesmo identificador e a mesma assinatura das versões anteriores: uma substitui a outra no mesmo aparelho. Instale TV na TV e Controle no celular. Se quiser espelhamento, substitua Controle por Celular no telefone; o vínculo de controle é preservado.
+
+### Atualização sem perder a conta
+
+Da versão 2.0.1 para 2.1.0, mantenha os dados: usuário, senha, câmeras, imagens e certificado são preservados. O segredo TOTP antigo é removido automaticamente, sem precisar do autenticador. Interrompa o uso de clientes antigos que ainda pedem esse código.
+
+Quem atualiza da 2.0.0 também recebe a correção de HTTPS introduzida na 2.0.1: o certificado da TV muda uma vez. Confira o novo SHA-256 e reconfigure o vínculo existente do Home Assistant e dos celulares. Não exclua a integração nem crie outra TV; isso ajuda a preservar entidades e automações.
 
 ## 3. Home Assistant
 
-Exige Home Assistant 2026.9 ou posterior. **Não é necessário criar usuário, senha ou autenticador no navegador para vincular a TV ao Home Assistant.** O código correto é o gerado em **Vincular Home Assistant** na TV; a alternativa é a chave exibida em **Ver chave do Home Assistant**.
+Exige Home Assistant 2026.9 ou posterior. **Não é necessário criar conta no app de controle para vincular a TV ao Home Assistant.** O código correto é o gerado em **Vincular Home Assistant** na TV; a alternativa é a chave exibida em **Ver chave do Home Assistant**.
 
 ### Pelo HACS
 
@@ -64,10 +74,10 @@ Instalações 1.x pedem reautenticação para aprovar o certificado. A identific
 
 ## 4. Notificações do celular
 
-1. Instale o mesmo APK no celular Android. Abra o app e aceite os termos.
+1. Instale **CasaNotify-Celular-2.1.0.apk** no celular Android, somente se a instalação for permitida pelo sistema. Abra o app e aceite os termos.
 2. Na TV: **Perfil → Vincular celular para avisos**.
-3. No celular: **Celular: enviar notificações**. Informe o IP da TV, confira o certificado com a TV e digite o código de vínculo de celular.
-4. Abra a permissão de acesso às notificações pelo botão do app e autorize CasaNotify TV no Android.
+3. No CasaNotify Celular, abra **Menu → Avisos dos aplicativos**. Informe o IP da TV, confira o certificado com a TV e digite o código de vínculo de celular.
+4. Leia a explicação de acesso às notificações pelo botão do app e solicite a autorização do Android. Se o sistema negar a permissão, mantenha o envio desligado; ele não funcionará automaticamente sem esse acesso.
 5. Escolha os aplicativos que podem enviar avisos e ative o envio. Se desejar, ative também **conteúdo das mensagens**.
 
 Por padrão, a TV recebe apenas o nome do aplicativo e aviso genérico. Algumas notificações podem ser omitidas por restrições do Android, economia de bateria, mensagens secretas ou palavras sensíveis. A proteção do Android não é contornada. No painel **Conta e celulares**, revogue aparelhos que não devem continuar enviando avisos. O celular e a TV precisam conseguir se comunicar pela rede/VPN.
@@ -81,19 +91,19 @@ Por padrão, a TV recebe apenas o nome do aplicativo e aviso genérico. Algumas 
 
 ## 6. VPN
 
-Na TV ou celular, abra **VPN e rede privada**. Para IKEv2 integrado, exige Android 11+ com suporte IPsec. Informe seu próprio servidor, identidade e usuário/senha ou PSK. Autorize a solicitação do Android. Servidores com certificado privado personalizado podem exigir um cliente externo; o formulário integrado usa a confiança do Android.
+Na TV, abra **VPN e rede privada**. No controle, use **Menu → VPN deste celular**. A autorização e o perfil da VPN de cada aparelho são controlados pelo Android nesse aparelho. Para IKEv2 integrado, exige Android 11+ com suporte IPsec. Informe seu próprio servidor, identidade e usuário/senha ou PSK. Autorize a solicitação do Android. Servidores com certificado privado personalizado podem exigir um cliente externo; o formulário integrado usa a confiança do Android.
 
 O botão **Abrir VPNs do Android** permite gerenciar VPNs já instaladas, conforme o fabricante. Não há servidor, assinatura nem túnel gratuito fornecido pelo CasaNotify. Se o mDNS não atravessar a VPN, use a vinculação manual por IP alcançável. A indicação de VPN ativa é a do Android; não testa o destino do seu túnel.
 
 ## Se algo não funcionar
 
-- **`ERR_CONNECTION_CLOSED` no navegador:** confirme APK 2.0.1 e receptor ativo. Digite o endereço completo, por exemplo `https://192.168.0.20:8766`, usando o IP atual mostrado na TV. A porta 8766 exige HTTPS; abrir `http://` nessa porta pode encerrar a conexão. Esse erro do navegador, sozinho, não identifica um bloqueio do Play Protect.
+- **`ERR_CONNECTION_CLOSED` no navegador:** o fluxo normal agora usa o app Controle. Se estiver diagnosticando a API, confirme APK 2.1.0 e receptor ativo. Digite o endereço completo `https://IP_DA_TV:8766`, usando o IP atual mostrado na TV. A porta 8766 exige HTTPS; abrir `http://` nessa porta pode encerrar a conexão. Esse erro do navegador, sozinho, não identifica um bloqueio do Play Protect.
 - **VPN ativa e painel inacessível:** confira se a VPN permite acesso à rede local e se celular e TV conseguem alcançar o mesmo endereço. Não exponha as portas no roteador para corrigir esse acesso local.
-- **Google Play Protect:** mantenha a proteção ativa e registre a mensagem exata, indicando se aparece na TV ou no celular. O Google distingue pedido de verificação de um bloqueio de instalação; permissões sensíveis, incluindo acesso às notificações, podem motivar bloqueios em APKs baixados pela Internet. Se oferecer verificação, solicite a análise. Se indicar aplicativo nocivo ou bloqueado para proteção, interrompa a instalação e envie a captura para investigação. A assinatura do APK, esta correção HTTPS e o código publicado não comprovam aprovação pelo Google. [Orientação oficial](https://developers.google.com/android/play-protect/warning-dev-guidance?hl=pt-br).
+- **Google Play Protect / acesso negado:** consulte [a explicação dos avisos e das edições](SEGURANCA_ANDROID.md). Mantenha a proteção ativa. As edições TV e Controle não incluem o leitor de notificações; a edição Celular continua dependendo dessa permissão. Ainda é necessário verificar o comportamento de instalação nos seus aparelhos.
 - Permissão de sobreposição: confirme em Configurações do Android → Aplicativos → Acesso especial.
 - TV não descoberta: confirme receptor ativo, mesma rede e ausência de isolamento de clientes. Tente IP manual.
 - Certificado mudou: confira na TV antes de vincular novamente. Não aprove valores desconhecidos.
-- Login bloqueado: aguarde cinco minutos. Para código inválido, confira relógios e espere novo código.
+- Login bloqueado: aguarde cinco minutos. Não é necessário código de autenticador. Um código inicial de cadastro vencido deve ser gerado novamente na TV.
 - Câmera não abre: confira URL, acesso à rede, autenticação e perfil H.264 suportado pelo aparelho.
 - VPN não conecta: confira os dados do servidor e a autorização do Android.
 - Alertas silenciosos: verifique pausa, horário silencioso, volume e saída de áudio da TV. Urgência ignora horário silencioso, mas respeita pausa.

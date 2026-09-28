@@ -3,7 +3,19 @@ android {
  namespace 'br.com.casanotify.tv'
  compileSdk 35
  buildToolsVersion '35.0.0'
- defaultConfig { applicationId 'br.com.casanotify.tv'; minSdk 26; targetSdk 35; versionCode 4; versionName '2.0.1' }
+ defaultConfig { applicationId 'br.com.casanotify.tv'; minSdk 26; targetSdk 35; versionCode 6; versionName '2.1.0' }
+ flavorDimensions 'device'
+ productFlavors {
+  tv { dimension 'device' }
+  phone { dimension 'device' }
+  control { dimension 'device' }
+ }
+ sourceSets {
+  control.java.srcDirs += 'src/companion/java'
+  phone.java.srcDirs += 'src/companion/java'
+  testControl.java.srcDirs += 'src/testCompanion/java'
+  testPhone.java.srcDirs += 'src/testCompanion/java'
+ }
  def keys=new Properties()
  if(rootProject.file('keystore.properties').exists()){
   rootProject.file('keystore.properties').withInputStream{keys.load(it)}
@@ -12,4 +24,4 @@ android {
  buildTypes { release { minifyEnabled false; if(keys['storeFile']) signingConfig signingConfigs.localRelease } }
  compileOptions { sourceCompatibility JavaVersion.VERSION_1_8; targetCompatibility JavaVersion.VERSION_1_8 }
 }
-dependencies { testImplementation 'junit:junit:4.13.2'; testImplementation 'org.json:json:20240303' }
+dependencies { testImplementation 'junit:junit:4.13.2'; testImplementation 'org.json:json:20240303'; testImplementation 'org.conscrypt:conscrypt-openjdk-uber:2.5.2' }

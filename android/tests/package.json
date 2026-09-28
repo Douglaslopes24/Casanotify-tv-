@@ -1,7 +1,7 @@
 {
   "private": true,
   "scripts": {
-    "test": "node panel.dom.cjs",
+    "test": "node panel.dom.cjs && node panel.dom.cjs --native",
     "test:browser": "node panel.browser.cjs"
   },
   "devDependencies": {

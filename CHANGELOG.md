@@ -1,5 +1,14 @@
 # Histórico
 
+## Aplicativos 2.1.0 — 28/09/2026
+
+- CasaNotify Controle no celular: cadastro, login, avisos, aparência, câmeras, imagens, conta, Home Assistant e histórico dentro do app, sem abrir navegador.
+- Login somente com usuário e senha; migração remove TOTP preservando hash/sal, nome, consentimento e bloqueio de tentativas. Cadastro inicial exige aprovação presencial da TV, sem segundo fator recorrente.
+- Interface empacotada localmente, transporte HTTPS com certificado fixado e lista de rotas, sem navegação externa nem aceitação de erros TLS. Sessão somente em memória. Seletor Android de imagens sem acesso geral a arquivos.
+- Três edições: TV receptora, Controle sem leitor de notificações e Celular com espelhamento opcional e consentimento. Mantém a identidade e assinatura do aplicativo; não há promessa de aprovação do Play Protect.
+- Certificado HTTPS da 2.0.1 e integração Home Assistant 2.0.1/API 2 preservados. As três edições têm versionCode 6 e mantêm os dados quando instaladas como atualização.
+- 37 testes Java e testes DOM do painel/canal nativo aprovados; APKs assinados, com permissões inspecionadas. Teste em hardware permanece necessário.
+
 ## Integração Home Assistant 2.0.1 — 27/09/2026
 
 - Respostas sem nome ou versão válidos agora produzem um erro tratado, evitando falhas inesperadas na configuração e nas entidades.
