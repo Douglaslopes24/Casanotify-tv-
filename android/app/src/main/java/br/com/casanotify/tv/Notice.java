@@ -7,6 +7,7 @@ public final class Notice {
  public static final Set<String> STYLE=new HashSet<>(Arrays.asList("theme","icon","position","duration","width","text_size","opacity","radius","margin","background","text_color","accent","sound","speak","volume","progress","animation","tone","backdrop"));
  private static final Set<String> KEYS=new HashSet<>(STYLE);
  static {KEYS.addAll(Arrays.asList("id","title","message","image_url","image_refresh","urgent","replace","video_url","video_muted"));}
+ public static final String[] TONES={"soft","doorbell","chime","pulse","alarm","digital","sound_01","sound_02","sound_03","sound_04","sound_05","sound_06","sound_07","sound_08","sound_09","sound_10"};
  public final String id,title,message,icon,theme,position,background,textColor,accent,imageUrl,animation,videoUrl,tone,backdrop;
  public final int duration,width,textSize,radius,margin,imageRefresh,volume;
  public final double opacity; public final boolean sound,speak,urgent,replace,progress,videoMuted; public final JSONObject json;
@@ -18,7 +19,7 @@ public final class Notice {
   theme=option(m,"theme","lime",THEMES);icon=option(m,"icon","bell",ICONS);position=option(m,"position","top_right",POSITIONS);animation=option(m,"animation","slide",new String[]{"slide","fade","none"});
   duration=integer(m,"duration",10,3,120);width=integer(m,"width",380,260,800);textSize=integer(m,"text_size",18,14,36);radius=integer(m,"radius",20,0,40);margin=integer(m,"margin",28,0,100);volume=integer(m,"volume",50,0,100);opacity=decimal(m,"opacity",.8,.4,.8);
   background=color(m,"background",palette(theme,0));textColor=color(m,"text_color",palette(theme,1));accent=color(m,"accent",palette(theme,2));
-  tone=option(m,"tone","soft",new String[]{"soft","doorbell","chime","pulse","alarm","digital"});backdrop=option(m,"backdrop","none",new String[]{"none","custom"});videoUrl=string(input,"video_url","",2048);validateVideoUrl(videoUrl);videoMuted=bool(input,"video_muted",true);
+  tone=option(m,"tone","soft",TONES);backdrop=option(m,"backdrop","none",new String[]{"none","custom"});videoUrl=string(input,"video_url","",2048);validateVideoUrl(videoUrl);videoMuted=bool(input,"video_muted",true);
   imageUrl=string(input,"image_url","",2048);if(!videoUrl.isEmpty()&&!imageUrl.isEmpty())throw new IllegalArgumentException("Escolha imagem ou vídeo RTSP para cada aviso.");validateImageUrl(imageUrl);imageRefresh=integer(input,"image_refresh",0,0,60);if(imageRefresh>0&&imageRefresh<5)throw new IllegalArgumentException("image_refresh deve ser 0 ou 5–60 segundos.");
   sound=bool(m,"sound",false);speak=bool(m,"speak",false);urgent=bool(input,"urgent",false);replace=bool(input,"replace",false);progress=bool(m,"progress",true);
   json=new JSONObject().put("id",id).put("title",title).put("message",message).put("icon",icon).put("theme",theme).put("position",position).put("duration",duration).put("width",width).put("text_size",textSize).put("radius",radius).put("margin",margin).put("volume",volume).put("opacity",opacity).put("background",background).put("text_color",textColor).put("accent",accent).put("image_url",imageUrl).put("image_refresh",imageRefresh).put("sound",sound).put("speak",speak).put("urgent",urgent).put("replace",replace).put("progress",progress).put("animation",animation).put("tone",tone).put("backdrop",backdrop).put("video_url",videoUrl).put("video_muted",videoMuted);

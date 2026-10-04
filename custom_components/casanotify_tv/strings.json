@@ -5,7 +5,7 @@
     "step": {
       "user": {
         "title": "Connect CasaNotify TV",
-        "description": "Use APK 2.0.1 or later and enable the receiver. Enter only the TV IPv4 address, without https:// or a port. Keep discovery port 8765; the panel and commands use HTTPS on 8766. A browser account is not required to pair Home Assistant.",
+        "description": "Use APK 2.2.0 or later and enable the receiver. Enter only the TV IPv4 address, without https:// or a port. Keep discovery port 8765; commands use HTTPS on 8766. A control app account is not required to pair Home Assistant.",
         "data": {
           "host": "TV IP address",
           "port": "Discovery port (8765)"
@@ -24,7 +24,7 @@
     "error": {
       "invalid_host": "Enter an IPv4 address without a URL or port.",
       "cannot_connect": "Cannot connect. Check the receiver and network.",
-      "unsupported_device": "Check the TV IP and update CasaNotify TV to 2.0.1 or later. The device did not return a valid identity.",
+      "unsupported_device": "Check the TV IP and update CasaNotify TV to 2.2.0 or later. The device did not return a valid identity.",
       "invalid_auth": "Invalid code/key or changed certificate. Verify the certificate and generate a new TV code.",
       "choose_credential": "Enter either a six-digit code OR the API key.",
       "confirm_fingerprint": "Compare and confirm the certificate on the TV before continuing."

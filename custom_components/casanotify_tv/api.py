@@ -1,6 +1,8 @@
 """Bounded local client with explicit SHA-256 certificate approval. Credentials never cross redirects."""
 
 import asyncio
+import hashlib
+import hmac
 import ipaddress
 import json
 import re
@@ -53,13 +55,52 @@ class CasaNotifyApi:
         self.base_url = f"https://{self.host}:{self.tls_port}"
 
     async def request(self, method, path, data=None, *, authenticate=True):
+        if method not in ("GET", "POST") or not re.fullmatch(r"/(api|media)/[a-z/]+", path):
+            raise CasaNotifyError("Invalid operation")
+        if not authenticate and (method, path) not in (
+            ("GET", "/api/info"),
+            ("GET", "/api/challenge"),
+            ("POST", "/api/pair"),
+        ):
+            raise InvalidAuth("Pairing is required")
+        body = (
+            json.dumps(data, ensure_ascii=False, separators=(",", ":")).encode() if data is not None else None
+        )
+        headers = {"Accept": "application/json"}
+        if body is not None:
+            headers["Content-Type"] = "application/json"
+        if authenticate:
+            if not self.token:
+                raise InvalidAuth("Pairing is required")
+            challenge = (await self.request("GET", "/api/challenge", authenticate=False)).get("challenge", "")
+            if not isinstance(challenge, str) or not re.fullmatch(
+                r"[0-9]{1,16}\.[A-Za-z0-9_-]{43}\.[0-9a-f]{64}", challenge
+            ):
+                raise CasaNotifyError("Invalid server challenge; update the TV app")
+
+            def digest(value):
+                return hashlib.sha256(value).hexdigest()
+
+            message = "\n".join(
+                ("CasaNotify-HMAC-v1", "ha", method, path, challenge, digest(body or b""), digest(b""), "")
+            )
+            proof = hmac.new(
+                digest(self.token.encode()).encode(), message.encode(), hashlib.sha256
+            ).hexdigest()
+            headers.update(
+                {
+                    "X-CasaNotify-Client": "ha",
+                    "X-CasaNotify-Challenge": challenge,
+                    "X-CasaNotify-Proof": proof,
+                }
+            )
+        return await self._send(method, path, body, headers, authenticate)
+
+    async def _send(self, method, path, body, headers, authenticate):
         discovery = path == "/api/info" and method == "GET" and not authenticate
         if not discovery and not re.fullmatch(r"[0-9a-f]{64}", self.fingerprint):
             raise InvalidAuth("Approve the TV certificate before pairing or sending commands")
         tls = None if discovery else aiohttp.Fingerprint(bytes.fromhex(self.fingerprint))
-        headers = {"Accept": "application/json"}
-        if authenticate:
-            headers["Authorization"] = f"Bearer {self.token}"
         try:
             async with (
                 asyncio.timeout(8),
@@ -67,7 +108,7 @@ class CasaNotifyApi:
                     method,
                     (self.discovery_url if discovery else self.base_url) + path,
                     ssl=tls,
-                    json=data,
+                    data=body,
                     headers=headers,
                     allow_redirects=False,
                 ) as response,
@@ -75,7 +116,7 @@ class CasaNotifyApi:
                 if response.status in (401, 403):
                     raise InvalidAuth("Access refused by TV")
                 if path == "/api/info" and response.status == 404:
-                    raise UnsupportedDevice("Install CasaNotify TV 2.0.0 or later")
+                    raise UnsupportedDevice("Install CasaNotify TV 2.2.0 or later")
                 body = bytearray()
                 async for part in response.content.iter_chunked(8192):
                     body.extend(part)
@@ -97,13 +138,13 @@ class CasaNotifyApi:
         try:
             info = await self.request("GET", "/api/info", authenticate=False)
         except InvalidAuth as err:
-            raise UnsupportedDevice("Install CasaNotify TV 2.0.0 or later") from err
+            raise UnsupportedDevice("Install CasaNotify TV 2.2.0 or later") from err
         self.validate_identity(info)
         return info
 
     @staticmethod
     def validate_identity(info):
-        if info.get("app") != "CasaNotify TV" or info.get("api_version") != 2:
+        if info.get("app") != "CasaNotify TV" or info.get("api_version") != 3:
             raise UnsupportedDevice("Unsupported app or API")
         try:
             for field in ("device_name", "version"):

@@ -40,11 +40,17 @@ def main():
         manifest = run(tools / 'aapt', 'dump', 'xmltree', apk, 'AndroidManifest.xml')
         permissions = set(re.findall(r"uses-permission: name='([^']+)'", badging))
         assert permissions == (common | receiver if edition == 'tv' else common), permissions
-        assert "name='br.com.casanotify.tv' versionCode='6' versionName='2.1.0'" in badging
+        assert "name='br.com.casanotify.tv' versionCode='7' versionName='2.2.0'" in badging
         assert "sdkVersion:'26'" in badging and "targetSdkVersion:'35'" in badging
         with zipfile.ZipFile(apk) as archive:
             assert archive.testzip() is None
             dex = b''.join(archive.read(n) for n in archive.namelist() if n.endswith('.dex'))
+            sounds = json.loads((pathlib.Path(__file__).resolve().parents[2] / 'docs/SONS.json').read_text())
+            assert len(sounds) == 10
+            for sound in sounds:
+                name = f'res/raw/{sound["id"]}.mp3'
+                assert archive.getinfo(name).compress_type == zipfile.ZIP_STORED, 'MediaPlayer needs uncompressed resources'
+                assert hashlib.sha256(archive.read(name)).hexdigest() == sound['sha256'], 'Sound bytes changed'
         if edition == 'tv':
             assert 'BIND_NOTIFICATION_LISTENER_SERVICE' not in manifest
             assert 'PhoneActivity' not in manifest and 'PhoneNotificationService' not in manifest
@@ -74,6 +80,7 @@ def main():
             'sha256': hashlib.sha256(apk.read_bytes()).hexdigest(),
             'permissions': sorted(permissions),
             'signature_matches': True,
+            'original_uncompressed_sounds': len(sounds),
         })
     print(json.dumps(results, ensure_ascii=False, indent=2))
 

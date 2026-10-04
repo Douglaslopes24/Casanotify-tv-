@@ -73,6 +73,7 @@ async def test_settings_preserve_other_fields_and_theme_clears_colors(hass, entr
         ("select", "ui_theme", "select_option", "option", "dark", "dark"),
         ("switch", "startup_animation", "turn_off", None, None, False),
         ("select", "tone", "select_option", "option", "doorbell", "doorbell"),
+        ("select", "tone", "select_option", "option", "sound_10", "sound_10"),
         ("select", "backdrop", "select_option", "option", "custom", "custom"),
         ("switch", "paused", "turn_on", None, None, True),
         ("text", "accent", "set_value", "value", "#12ABEF", "#12ABEF"),

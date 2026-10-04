@@ -23,8 +23,8 @@ def tv():
     state = {
         "info": {
             "app": "CasaNotify TV",
-            "api_version": 2,
-            "version": "2.0.0",
+            "api_version": 3,
+            "version": "2.2.0",
             "tls_fingerprint": FINGERPRINT,
             "tls_port": 8766,
             "device_id": DEVICE_ID,

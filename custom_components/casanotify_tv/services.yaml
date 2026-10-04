@@ -212,6 +212,16 @@ send_notification:
           - pulse
           - alarm
           - digital
+          - sound_01
+          - sound_02
+          - sound_03
+          - sound_04
+          - sound_05
+          - sound_06
+          - sound_07
+          - sound_08
+          - sound_09
+          - sound_10
     backdrop:
       name: Plano de fundo
       selector:

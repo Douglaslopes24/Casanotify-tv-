@@ -25,8 +25,8 @@ public final class DiscoveryAdvertiser implements AutoCloseable {
         info.setServiceType("_casanotify._tcp.");
         info.setPort(Prefs.PORT);
         info.setAttribute("id", id);
-        info.setAttribute("api", "2");
-        info.setAttribute("version", "2.1.0");
+        info.setAttribute("api", "3");
+        info.setAttribute("version", "2.2.0");
         listener = new NsdManager.RegistrationListener() {
             public void onServiceRegistered(NsdServiceInfo service) {
                 registered = true;

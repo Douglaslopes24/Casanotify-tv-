@@ -1,0 +1,72 @@
+[
+  {
+    "id": "sound_01",
+    "label": "Notificação 051",
+    "source": "universfield-new-notification-051-494246.mp3",
+    "duration": 2.4555,
+    "sha256": "b1559967dedb7994a82371f10cec9f7f3992e6b147b4cd88d62112bcdc3f9ba3"
+  },
+  {
+    "id": "sound_02",
+    "label": "Notificação 3",
+    "source": "dragon-studio-new-notification-3-398649.mp3",
+    "duration": 0.504,
+    "sha256": "053a2fe627916e048af1ce04b356988f3844754f370ea169f16bdf8f72eb0d07"
+  },
+  {
+    "id": "sound_03",
+    "label": "Sino 1",
+    "source": "u_3ay6aijdt2-bell1-445873.mp3",
+    "duration": 1.828563,
+    "sha256": "24681249a342480ea67b596e795341d8b50332e1480f0f291d55b1ea27b2f2fa"
+  },
+  {
+    "id": "sound_04",
+    "label": "Notificação 040",
+    "source": "universfield-new-notification-040-493469.mp3",
+    "duration": 1.071,
+    "sha256": "c13da61f3e5bcd79ce3e8785715970ef8d09b2edcd5f956febc6d83e6a759827"
+  },
+  {
+    "id": "sound_05",
+    "label": "Sino de aviso",
+    "source": "u_796n041slx-notificacao-sino-527198.mp3",
+    "duration": 1.619594,
+    "sha256": "c34c4030b31ec3d88e9c9653ada0ccb528d0dcc8311837a40b18a2a006139a20"
+  },
+  {
+    "id": "sound_06",
+    "label": "Efeito de notificação",
+    "source": "dragon-studio-notification-sound-effect-372475.mp3",
+    "duration": 1.097125,
+    "sha256": "3b6c199ac8fe61149913b71c1159424ae3ceaaa4f84f60e522317072b003ae71"
+  },
+  {
+    "id": "sound_07",
+    "label": "Notificação 057",
+    "source": "universfield-new-notification-057-494255.mp3",
+    "duration": 2.037531,
+    "sha256": "4445ce06cc3d6b2b5e41e1c01be86f97775b8856407db36bb55ab7897c79d643"
+  },
+  {
+    "id": "sound_08",
+    "label": "Notificação 062",
+    "source": "universfield-new-notification-062-494544.mp3",
+    "duration": 1.056,
+    "sha256": "c307ed5f6703992aa6d25beb119816091c1d2e4a772965d299024ca050bd3d9a"
+  },
+  {
+    "id": "sound_09",
+    "label": "Notificação simples",
+    "source": "universfield-simple-notification-152054.mp3",
+    "duration": 3.395906,
+    "sha256": "eeba885a6fecaf9b0700b5aad6b31910c2d1a0d32fd3aa71a4a2e7233da3fb89"
+  },
+  {
+    "id": "sound_10",
+    "label": "Notificação 033",
+    "source": "universfield-new-notification-033-480571.mp3",
+    "duration": 2.925688,
+    "sha256": "42f6807a4ca04dac647ae192de5b0d04483af07fb510b6be72fa832c8e74cfa0"
+  }
+]

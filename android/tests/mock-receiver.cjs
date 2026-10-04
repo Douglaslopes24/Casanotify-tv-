@@ -4,8 +4,8 @@ module.exports=function receiver(){
 const state={registered:false,session:false,config:{device_name:'TV de teste',defaults:{},auto_start:false,paused:false,quiet_enabled:false,quiet_start:'22:00',quiet_end:'07:00',ui_theme:'system',startup_animation:true},profile:{username:'douglas',display_name:'Douglas',two_factor:false},events:[],calls:[],cameras:[],phones:[{id:'phone-test',name:'Meu celular'}],notice:null};
 const csrf='fixture-csrf',result=(status,data)=>({ok:status<300,status,json:async()=>data,blob:async()=>new Blob([]),data});
 async function request(url,opts={}){const pathname=new URL(url,'https://192.168.1.50:8766').pathname,b=opts.body?JSON.parse(opts.body):{},headers=Object.fromEntries(Object.entries(opts.headers||{}).map(([k,v])=>[k.toLowerCase(),v]));state.calls.push({path:pathname,opts});
-if(pathname==='/auth/state')return result(200,{registered:state.registered,terms_version:'2026-09-28'});
-if(pathname==='/auth/register'){if(b.code!=='123456'||!b.accepted_terms||b.terms_version!=='2026-09-28')return result(400,{error:'Código ou termos inválidos'});state.profile={...state.profile,username:b.username,display_name:b.display_name};state.registered=true;state.session=true;return result(200,{profile:state.profile,csrf});}
+if(pathname==='/auth/state')return result(200,{registered:state.registered,terms_version:'2026-10-03'});
+if(pathname==='/auth/register'){if(!b.accepted_terms||b.terms_version!=='2026-10-03')return result(400,{error:'Código ou termos inválidos'});state.profile={...state.profile,username:b.username,display_name:b.display_name};state.registered=true;state.session=true;return result(200,{profile:state.profile,csrf});}
 if(pathname==='/auth/login'){if(b.username!=='douglas'||b.password!=='long test password')return result(401,{error:'Login inválido'});state.session=true;return result(200,{profile:state.profile,csrf});}
 if(!state.session)return result(401,{error:'Entre novamente'});
 if(opts.method==='POST'&&headers['x-casanotify-csrf']!==csrf)return result(403,{error:'CSRF ausente'});

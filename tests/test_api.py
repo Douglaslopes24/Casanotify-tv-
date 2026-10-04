@@ -8,17 +8,23 @@ from custom_components.casanotify_tv.notify import SEND_SCHEMA
 
 from .conftest import DEVICE_ID, FINGERPRINT, TOKEN
 
+CHALLENGE = "1800000000000." + "a" * 43 + "." + "b" * 64
 BASE = "https://192.168.1.50:8766"
 DISCOVERY = "http://192.168.1.50:8765"
 IDENTITY = {
     "app": "CasaNotify TV",
-    "api_version": 2,
+    "api_version": 3,
     "device_name": "TV de teste",
-    "version": "2.0.1",
+    "version": "2.2.0",
     "device_id": DEVICE_ID,
     "tls_fingerprint": FINGERPRINT,
     "tls_port": 8766,
 }
+
+
+@pytest.fixture(autouse=True)
+def challenge_response(aioclient_mock):
+    aioclient_mock.get(BASE + "/api/challenge", json={"challenge": CHALLENGE})
 
 
 async def test_https_pair_and_http_discovery(aioclient_mock):
@@ -31,7 +37,7 @@ async def test_https_pair_and_http_discovery(aioclient_mock):
         assert await client.pair("123456") == TOKEN
         assert client.token == TOKEN
         await client.status()
-    assert aioclient_mock.call_count == 3
+    assert aioclient_mock.call_count == 4
 
 
 @pytest.mark.parametrize("field", ["device_name", "version"])
@@ -74,7 +80,7 @@ async def test_redirect_does_not_forward_credentials(aioclient_mock):
     async with aioclient_mock.create_session(asyncio.get_running_loop()) as session:
         with pytest.raises(CasaNotifyError):
             await CasaNotifyApi(session, "192.168.1.50", 8765, TOKEN, FINGERPRINT).status()
-    assert aioclient_mock.call_count == 1
+    assert aioclient_mock.call_count == 2
 
 
 async def test_large_response_rejected(aioclient_mock):
@@ -130,3 +136,22 @@ def test_rtsp_and_new_options():
         }
     )
     assert result["video_muted"] is True
+
+
+@pytest.mark.parametrize("tone", [f"sound_{n:02d}" for n in range(1, 11)])
+def test_all_supplied_sounds_accepted(tone):
+    assert vol.Schema(SEND_SCHEMA)({"message": "Som", "tone": tone})["tone"] == tone
+
+
+async def test_unpaired_client_cannot_request_status(aioclient_mock):
+    async with aioclient_mock.create_session(asyncio.get_running_loop()) as session:
+        with pytest.raises(InvalidAuth, match="Pairing"):
+            await CasaNotifyApi(session, "192.168.1.50", 8765, fingerprint=FINGERPRINT).status()
+    assert aioclient_mock.call_count == 0
+
+
+async def test_legacy_api_requires_update(aioclient_mock):
+    aioclient_mock.get(DISCOVERY + "/api/info", json=IDENTITY | {"api_version": 2})
+    async with aioclient_mock.create_session(asyncio.get_running_loop()) as session:
+        with pytest.raises(UnsupportedDevice):
+            await CasaNotifyApi(session, "192.168.1.50", 8765).info()

@@ -3,7 +3,7 @@
 from homeassistant.const import Platform
 
 DOMAIN = "casanotify_tv"
-INTEGRATION_VERSION = "2.0.1"
+INTEGRATION_VERSION = "2.1.0"
 PORT = 8765
 PLATFORMS = [
     Platform.BINARY_SENSOR,
@@ -51,7 +51,24 @@ ICONS = [
     "water",
     "alarm",
 ]
-TONES = ["soft", "doorbell", "chime", "pulse", "alarm", "digital"]
+TONES = [
+    "soft",
+    "doorbell",
+    "chime",
+    "pulse",
+    "alarm",
+    "digital",
+    "sound_01",
+    "sound_02",
+    "sound_03",
+    "sound_04",
+    "sound_05",
+    "sound_06",
+    "sound_07",
+    "sound_08",
+    "sound_09",
+    "sound_10",
+]
 BACKDROPS = ["none", "custom"]
 UI_THEMES = ["system", "light", "dark"]
 ANIMATIONS = ["slide", "fade", "none"]

@@ -1,4 +1,4 @@
-# Aplicativos Android — CasaNotify 2.1.0
+# Aplicativos Android — CasaNotify 2.2.0
 
 Receptor Android TV em Java e app de controle com interface empacotada em WebView, HTTPS com certificado fixado e conta local por usuário/senha, câmeras RTSP, personalização, notificações do celular e VPN IKEv2 em aparelhos compatíveis.
 
@@ -36,9 +36,9 @@ A pasta de JARs precisa conter `junit.jar` (JUnit 4.13.2), `hamcrest.jar` (Hamcr
 Confira também os artefatos assinados, incluindo permissões, componentes, ausência das classes de espelhamento na edição TV, versão, alinhamento e certificado de assinatura:
 
 ```sh
-python3 android/tools/verify_apks.py --build-tools /caminho/Android/Sdk/build-tools/35.0.0 --jdk /caminho/jdk17 --tv android/build/CasaNotify-TV-2.1.0.apk --control android/build/CasaNotify-Controle-2.1.0.apk --phone android/build/CasaNotify-Celular-2.1.0.apk --expected-certificate b132bd2e9d9dd5db7e338f0179b16c1a13eefd2e84e34ee93bfac063b57b48fc
+python3 android/tools/verify_apks.py --build-tools /caminho/Android/Sdk/build-tools/35.0.0 --jdk /caminho/jdk17 --tv android/build/CasaNotify-TV-2.2.0.apk --control android/build/CasaNotify-Controle-2.2.0.apk --phone android/build/CasaNotify-Celular-2.2.0.apk --expected-certificate b132bd2e9d9dd5db7e338f0179b16c1a13eefd2e84e34ee93bfac063b57b48fc
 ```
 
 Teste visual opcional: instale os navegadores com `npx playwright install chromium` e execute `npm run test:browser` em ambiente que permita iniciar Chromium. Nesta entrega esse teste foi bloqueado pelo ambiente; veja [o relatório](../docs/VALIDACAO.md).
 
-Leia [instalação](../docs/INSTALACAO.md) e [API](API.md). A API 2 exige HTTPS para comandos e novo vínculo ao atualizar da API 1.
+Leia [instalação](../docs/INSTALACAO.md) e [API](API.md). A API 3 exige HTTPS fixado e prova da chave vinculada por comando. Atualize também a integração HA para 2.1.0; veja as instruções de migração.

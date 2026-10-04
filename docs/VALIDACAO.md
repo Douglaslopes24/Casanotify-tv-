@@ -1,6 +1,16 @@
 # Validação — CasaNotify TV
 
-Última revisão da integração e dos aplicativos: 27/09/2026.
+Última revisão da integração e dos aplicativos: 03/10/2026.
+
+## Aplicativos 2.2.0 / integração 2.1.0 — segurança e sons
+
+- **45 testes Java/JUnit aprovados**, incluindo cenários locais de ataque contra prova, repetição, sessão e parser. TLS real com certificado fixado e recusa de certificado diferente antes do envio de senha.
+- **71 testes Python aprovados com Home Assistant 2026.9.3/Python 3.14.7**, incluindo as 37 entidades e HTTPS real local verificando a prova dos comandos GET/POST com texto UTF-8. Análise Ruff aprovada.
+- **DOM aprovado nos dois transportes**, incluindo canal nativo simulado sem rede WebView: cadastro, login sem segundo fator, CSRF, limpeza de segredos, 21 ícones, 16 toques, temas, câmera, perfil, histórico, revogação e senha.
+- Três APKs: versão 2.2.0, versionCode 7, mínimo API 26 e alvo API 35. Assinatura original v2/v3, alinhamento e permissões inspecionados. TV/Controle não contêm classe/serviço de leitura de notificações.
+- Os 10 MP3s foram decodificados para inspeção, têm um stream de áudio cada, duração aproximada de 0,5–3,4 s e são empacotados sem compressão ZIP, com bytes/hashes originais preservados. Reprodução efetiva no MediaPlayer da TV ainda requer aparelho.
+- API 3 incompatível com clientes antigos. Certificado, conta, identidade e chave HA preservados; controles antigos precisam de novo vínculo físico inicial. Login continua sem TOTP/SMS.
+- Relatório: [revisão e testes de segurança](SEGURANCA_2_2.md). Não houve teste na TV real, emulador ou celular. Nenhuma aprovação do Play Protect foi obtida. Os registros abaixo são históricos.
 
 ## Aplicativos 2.1.0 — controle pelo app e login sem TOTP
 

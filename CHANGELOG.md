@@ -1,5 +1,15 @@
 # Histórico
 
+## Aplicativos 2.2.0 e integração 2.1.0 — 03/10/2026
+
+- API 3: prova HMAC-SHA256 com desafio de uso único por comando, dentro de HTTPS fixado. Rejeição de comandos alterados, expirados e repetidos. Sem segredo compartilhado por todos os APKs.
+- Cada controle recebe chave própria após autorização física na TV. Login mantém usuário e senha, sem TOTP/SMS. Sessões são vinculadas ao controle; revogação bloqueia o cliente.
+- Painel e login retirados do servidor da TV; ajustes exclusivamente pela interface empacotada no controle. Removido acesso administrativo por Bearer isolado.
+- Parser recusa UTF-8 malformado e controles nos cabeçalhos/caminho. Tempo de resposta de autenticação ampliado para aparelhos lentos.
+- Adicionados os 10 MP3s fornecidos, total de 16 toques, selecionáveis no controle e Home Assistant. Reprodução interrompida ao limpar/substituir aviso.
+- Conta, certificado da 2.0.1/2.1.0, identidade e chave HA preservados. Exige atualizar todos os clientes; controle anterior precisa de um novo vínculo inicial.
+- Testes de ataque limitados ao laboratório local; relatório em `docs/SEGURANCA_2_2.md`. Assinatura original e versionCode 7.
+
 ## Aplicativos 2.1.0 — 28/09/2026
 
 - CasaNotify Controle no celular: cadastro, login, avisos, aparência, câmeras, imagens, conta, Home Assistant e histórico dentro do app, sem abrir navegador.

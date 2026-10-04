@@ -7,13 +7,13 @@ import org.json.*;
 public final class AccountManager {
     public interface Store { String read() throws Exception; void write(String s) throws Exception; void delete() throws Exception; }
     public interface Clock { long now(); }
-    public static final String TERMS_VERSION="2026-09-28";
+    public static final String TERMS_VERSION="2026-10-03";
     private final Store store; private final Clock clock;
     private int failures; private long blockedUntil;
     private final Map<String,Session> sessions=new LinkedHashMap<>();
     public static final class Session {
-        public final String id=AuthCrypto.token(),csrf=AuthCrypto.token();public final long created;public long touched;
-        Session(long now){created=touched=now;}
+        public final String id=AuthCrypto.token(),csrf=AuthCrypto.token();public final long created;public long touched;public final String clientId;
+        Session(long now,String clientId){created=touched=now;this.clientId=clientId;}
     }
     public AccountManager(Store store){this(store,System::currentTimeMillis);}
     public AccountManager(Store store,Clock clock){this.store=store;this.clock=clock;}
@@ -32,23 +32,26 @@ public final class AccountManager {
         if(username==null||!username.matches("[a-zA-Z0-9._-]{3,40}"))throw new IllegalArgumentException("Usuário: use 3–40 letras, números, ponto, traço ou sublinhado.");
         if(name==null||name.trim().isEmpty()||name.length()>60)throw new IllegalArgumentException("Informe seu nome, até 60 caracteres.");passwordPolicy(password);
     }
-    public synchronized Session register(String username,String name,String password,boolean accepted)throws Exception{
+    public synchronized Session register(String username,String name,String password,boolean accepted)throws Exception{return register(username,name,password,accepted,"");}
+    public synchronized Session register(String username,String name,String password,boolean accepted,String clientId)throws Exception{
         validateRegistration(username,name,password,accepted);
         String salt=Base64.getEncoder().encodeToString(AuthCrypto.randomBytes(24));
         JSONObject a=new JSONObject().put("username",username.toLowerCase(Locale.ROOT)).put("display_name",name.trim()).put("salt",salt).put("password_hash",AuthCrypto.hash(password,salt)).put("terms_version",TERMS_VERSION).put("terms_accepted_at",clock.now()).put("failures",0).put("blocked_until",0);
-        store.write(a.toString());return createSession();
+        store.write(a.toString());return createSession(clientId);
     }
-    private Session createSession(){while(sessions.size()>=16)sessions.remove(sessions.keySet().iterator().next());Session s=new Session(clock.now());sessions.put(s.id,s);return s;}
-    public synchronized Session login(String username,String password)throws Exception{
+    private Session createSession(String clientId){while(sessions.size()>=16)sessions.remove(sessions.keySet().iterator().next());Session s=new Session(clock.now(),clientId);sessions.put(s.id,s);return s;}
+    public synchronized Session login(String username,String password)throws Exception{return login(username,password,"");}
+    public synchronized Session login(String username,String password,String clientId)throws Exception{
         JSONObject a=account();if(a==null)throw new IllegalArgumentException("Login inválido.");
         long now=clock.now();blockedUntil=Math.max(blockedUntil,a.optLong("blocked_until"));failures=Math.max(failures,a.optInt("failures"));
         if(now<blockedUntil)throw new IllegalArgumentException("Aguarde cinco minutos antes de tentar novamente.");
         if(blockedUntil>0){failures=0;blockedUntil=0;}
         boolean pass=password!=null&&password.length()<=128&&AuthCrypto.same(AuthCrypto.hash(password,a.getString("salt")),a.getString("password_hash"));
         if(!pass||username==null||!AuthCrypto.same(username.toLowerCase(Locale.ROOT),a.getString("username"))){failures++;if(failures>=5)blockedUntil=now+300000;a.put("failures",failures).put("blocked_until",blockedUntil);store.write(a.toString());throw new IllegalArgumentException("Usuário ou senha inválidos.");}
-        failures=0;blockedUntil=0;a.put("failures",0).put("blocked_until",0);store.write(a.toString());return createSession();
+        failures=0;blockedUntil=0;a.put("failures",0).put("blocked_until",0);store.write(a.toString());return createSession(clientId);
     }
     public synchronized Session session(String id){return session(id,true);}
+    public synchronized Session session(String id,String clientId,boolean touch){Session s=sessions.get(id);if(s==null||!AuthCrypto.same(s.clientId,clientId))return null;return session(id,touch);}
     public synchronized Session session(String id,boolean touch){Session s=sessions.get(id);long now=clock.now();if(s==null)return null;if(now-s.created>43200000||now-s.touched>1800000){sessions.remove(id);return null;}if(touch)s.touched=now;return s;}
     public synchronized void logout(String id){sessions.remove(id);}
     public synchronized void changePassword(String old,String replacement)throws Exception{
