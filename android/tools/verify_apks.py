@@ -26,6 +26,7 @@ def main():
         return subprocess.check_output([str(x) for x in command], text=True)
 
     common = {'android.permission.INTERNET', 'android.permission.ACCESS_NETWORK_STATE'}
+    discovery = {'android.permission.ACCESS_WIFI_STATE', 'android.permission.CHANGE_WIFI_MULTICAST_STATE'}
     receiver = {
         'android.permission.SYSTEM_ALERT_WINDOW',
         'android.permission.FOREGROUND_SERVICE',
@@ -39,8 +40,8 @@ def main():
         badging = run(tools / 'aapt', 'dump', 'badging', apk)
         manifest = run(tools / 'aapt', 'dump', 'xmltree', apk, 'AndroidManifest.xml')
         permissions = set(re.findall(r"uses-permission: name='([^']+)'", badging))
-        assert permissions == (common | receiver if edition == 'tv' else common), permissions
-        assert "name='br.com.casanotify.tv' versionCode='7' versionName='2.2.0'" in badging
+        assert permissions == (common | receiver if edition == 'tv' else common | discovery | ({'android.permission.RECEIVE_BOOT_COMPLETED'} if edition == 'phone' else set())), permissions
+        assert "name='br.com.casanotify.tv' versionCode='8' versionName='2.3.0'" in badging
         assert "sdkVersion:'26'" in badging and "targetSdkVersion:'35'" in badging
         with zipfile.ZipFile(apk) as archive:
             assert archive.testzip() is None
@@ -51,6 +52,10 @@ def main():
                 name = f'res/raw/{sound["id"]}.mp3'
                 assert archive.getinfo(name).compress_type == zipfile.ZIP_STORED, 'MediaPlayer needs uncompressed resources'
                 assert hashlib.sha256(archive.read(name)).hexdigest() == sound['sha256'], 'Sound bytes changed'
+        if edition in ('tv', 'control'):
+            for component in ('MirrorSender', 'MirrorRetryJob', 'MirrorBootReceiver'):
+                assert component not in manifest
+                assert f'Lbr/com/casanotify/tv/{component};'.encode() not in dex
         if edition == 'tv':
             assert 'BIND_NOTIFICATION_LISTENER_SERVICE' not in manifest
             assert 'PhoneActivity' not in manifest and 'PhoneNotificationService' not in manifest
@@ -68,7 +73,8 @@ def main():
             assert 'ControlActivity' in manifest
             assert 'BIND_NOTIFICATION_LISTENER_SERVICE' in manifest
             assert 'PhoneActivity' in manifest and 'PhoneNotificationService' in manifest
-            assert 'MainActivity' not in manifest and 'BootReceiver' not in manifest
+            assert 'MirrorRetryJob' in manifest and 'MirrorBootReceiver' in manifest and 'BIND_JOB_SERVICE' in manifest
+            assert 'MainActivity' not in manifest and '"br.com.casanotify.tv.BootReceiver"' not in manifest
             assert '.NotifyService' not in manifest
         signature = run(java, '-jar', tools / 'lib/apksigner.jar', 'verify', '--print-certs', apk)
         certificate = re.search(r'certificate SHA-256 digest: ([0-9a-f]+)', signature).group(1)

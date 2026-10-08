@@ -13,13 +13,18 @@ public final class ApiController implements LanServer.Handler {
     private final Handler main=new Handler(Looper.getMainLooper());
     private final String fingerprint;private final RequestAuth requestAuth;
     public ApiController(Context c,Prefs p,OverlayManager o)throws Exception{
-        context=c;prefs=p;overlay=o;accounts=SecretStore.accounts(c);phones=new PhoneTokens(c);cameras=new CameraStore(c);media=new MediaAssets(c);fingerprint=LocalTls.fingerprint();requestAuth=new RequestAuth(id->id.equals("ha")?new RequestAuth.Key(AuthCrypto.digest(prefs.token()),"ha"):phones.key(id));
+        context=c;prefs=p;overlay=o;accounts=SecretStore.accounts(c);phones=PhoneTokens.get(c);cameras=new CameraStore(c);media=new MediaAssets(c);fingerprint=LocalTls.fingerprint();requestAuth=new RequestAuth(id->id.equals("ha")?new RequestAuth.Key(AuthCrypto.digest(prefs.token()),"ha"):phones.key(id));
     }
-    private JSONObject info()throws Exception{return new JSONObject().put("app","CasaNotify TV").put("version","2.2.0").put("api_version",3).put("control_protocol",2).put("auth_mode","password").put("device_id",prefs.deviceId()).put("device_name",prefs.config().optString("device_name")).put("tls_port",Prefs.SECURE_PORT).put("tls_fingerprint",fingerprint);}
+    private JSONObject info()throws Exception{return new JSONObject().put("app","CasaNotify TV").put("version","2.3.0").put("api_version",3).put("control_protocol",2).put("auth_mode","password").put("device_id",prefs.deviceId()).put("device_name",prefs.config().optString("device_name")).put("tls_port",Prefs.SECURE_PORT).put("tls_fingerprint",fingerprint);}
     private static LanServer.Response json(JSONObject o){return LanServer.Response.json(200,o.toString());}
     private static String string(JSONObject o,String k,int n)throws JSONException{return Notice.string(o,k,"",n);}
     private static String cookieId(String cookie){if(cookie==null)return "";for(String part:cookie.split(";")){String[] p=part.trim().split("=",2);if(p.length==2&&p[0].equals("__Host-casanotify")&&p[1].matches("[A-Za-z0-9_-]{43}"))return p[1];}return "";}
     private LanServer.Response sessionResponse(AccountManager.Session s)throws Exception{return json(new JSONObject().put("profile",accounts.profile()).put("csrf",s.csrf)).header("Set-Cookie",AccountManager.cookie(s));}
+    private LanServer.Response loginResponse(AccountManager.Session session,JSONObject request)throws Exception{
+        JSONObject result=new JSONObject().put("profile",accounts.profile()).put("csrf",session.csrf);
+        if(Notice.bool(request,"remember",false))result.put("resume_token",accounts.remember(session));else accounts.forgetGrant(session.clientId);
+        return json(result).header("Set-Cookie",AccountManager.cookie(session));
+    }
     public LanServer.Response handle(LanServer.Request r)throws Exception{
         try{
             if(r.method.equals("GET")&&r.path.equals("/api/info"))return json(info());
@@ -32,6 +37,7 @@ public final class ApiController implements LanServer.Handler {
             }
             RequestAuth.Client client=requestAuth.verify(r);
             if(client==null)return LanServer.Response.error(401,"Acesso exclusivo para clientes vinculados. Atualize o app e a integração. No controle, use Menu → Trocar TV para vincular novamente.");
+            if(r.method.equals("GET")&&r.path.equals("/api/hello"))return json(info());
             if(r.path.startsWith("/auth/")&&!client.role.equals("control"))return LanServer.Response.error(403,"Esta operação exige o aplicativo de controle vinculado.");
             if(r.method.equals("GET")&&r.path.equals("/auth/state"))return json(new JSONObject().put("registered",accounts.exists()).put("terms_version",AccountManager.TERMS_VERSION));
             if(r.method.equals("POST")&&r.path.startsWith("/auth/")){
@@ -40,15 +46,17 @@ public final class ApiController implements LanServer.Handler {
                     case "/auth/register":
                         if(!AccountManager.TERMS_VERSION.equals(string(d,"terms_version",30)))return LanServer.Response.error(400,"Atualize o aplicativo e leia os termos atuais.");
                         accounts.validateRegistration(string(d,"username",40),string(d,"display_name",60),string(d,"password",128),Notice.bool(d,"accepted_terms",false));
-                        return sessionResponse(accounts.register(string(d,"username",40),string(d,"display_name",60),string(d,"password",128),Notice.bool(d,"accepted_terms",false),client.id));
-                    case "/auth/login":try{return sessionResponse(accounts.login(string(d,"username",40),string(d,"password",128),client.id));}catch(IllegalArgumentException e){return LanServer.Response.error(401,e.getMessage());}
+                        return loginResponse(accounts.register(string(d,"username",40),string(d,"display_name",60),string(d,"password",128),Notice.bool(d,"accepted_terms",false),client.id),d);
+                    case "/auth/resume":try{return sessionResponse(accounts.resume(client.id,string(d,"resume_token",100)));}catch(IllegalArgumentException e){return LanServer.Response.error(401,e.getMessage());}
+                    case "/auth/login":try{return loginResponse(accounts.login(string(d,"username",40),string(d,"password",128),client.id),d);}catch(IllegalArgumentException e){return LanServer.Response.error(401,e.getMessage());}
                 }
             }
             String sessionId=cookieId(r.headers.get("cookie"));AccountManager.Session session=accounts.session(sessionId,client.id,!r.path.equals("/api/status")&&!r.path.equals("/api/history"));
             boolean admin=client.role.equals("ha");
             if(session!=null&&r.method.equals("POST")&&!AuthCrypto.same(session.csrf,r.headers.get("x-casanotify-csrf")))return LanServer.Response.error(403,"Sessão expirada. Entre novamente.");
             if(client.role.equals("phone")||session==null&&!admin){
-                if(r.method.equals("POST")&&r.path.equals("/api/notify")&&client.role.equals("phone")&&phones.allowNotice(client.id)){
+                if(r.method.equals("POST")&&r.path.equals("/api/notify")&&client.role.equals("phone")){
+                    if(!phones.allowNotice(client.id))return LanServer.Response.error(429,"Aguarde antes de enviar mais avisos.");
                     JSONObject d=new JSONObject(r.body);JSONObject limited=new JSONObject().put("title",Notice.string(d,"title","Celular",160)).put("message",string(d,"message",1200)).put("icon","phone").put("duration",10).put("id","phone-"+string(d,"id",60));
                     Notice n=new Notice(limited,prefs.defaults());return onMain(()->overlay.receive(n));
                 }
@@ -67,7 +75,7 @@ public final class ApiController implements LanServer.Handler {
             if(r.method.equals("POST")){
                 JSONObject d=new JSONObject(r.body);
                 switch(r.path){
-                    case "/auth/logout":accounts.logout(sessionId);return json(new JSONObject().put("ok",true)).header("Set-Cookie",AccountManager.clearCookie());
+                    case "/auth/logout":accounts.forgetClient(client.id);return json(new JSONObject().put("ok",true)).header("Set-Cookie",AccountManager.clearCookie());
                     case "/auth/password":accounts.changePassword(string(d,"current",128),string(d,"password",128));return json(new JSONObject().put("ok",true)).header("Set-Cookie",AccountManager.clearCookie());
                     case "/auth/profile":accounts.rename(string(d,"display_name",60));return json(accounts.profile());
                     case "/api/notify":if(d.has("camera_id")){d.put("video_url",cameras.url(string(d,"camera_id",80)));d.remove("camera_id");}Notice n=new Notice(d,prefs.defaults());return onMain(()->overlay.receive(n));
@@ -78,6 +86,7 @@ public final class ApiController implements LanServer.Handler {
                     case "/api/cameras/save":cameras.save(string(d,"id",80),string(d,"name",60),string(d,"url",2048));return json(new JSONObject().put("items",cameras.list()));
                     case "/api/cameras/delete":cameras.remove(string(d,"id",80));return json(new JSONObject().put("items",cameras.list()));
                     case "/api/cameras/test":Notice camera=new Notice(new JSONObject().put("title","Câmera ao vivo").put("message","Transmissão RTSP").put("icon","camera").put("video_url",cameras.url(string(d,"id",80))).put("duration",30).put("replace",true),prefs.defaults());return onMain(()->overlay.receive(camera));
+                    case "/api/phones/link":if(session==null||!client.role.equals("control"))return LanServer.Response.error(403,"Entre no controle para vincular avisos.");return json(new JSONObject().put("token",phones.issueLinked(client.id,Notice.string(d,"name","Meu celular",60))));
                     case "/api/phones/revoke":phones.revoke(string(d,"id",80));return json(new JSONObject().put("items",phones.publicList()));
                 }
             }

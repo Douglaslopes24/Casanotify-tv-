@@ -2,26 +2,35 @@
 
 Notificações personalizadas sobre a tela do Android TV, com integração própria para o Home Assistant e envio opcional de notificações do celular.
 
-**Aplicativos 2.2.0 · Integração 2.1.0 · Android 8+ · Home Assistant 2026.9+ · 37 entidades por TV**
+**Aplicativos 2.3.0 · Integração 2.1.0 · Android 8+ · Home Assistant 2026.9+ · 37 entidades por TV**
 
 ## Downloads
 
-- [CasaNotify TV 2.2.0 — instalar na TV/receptor](downloads/CasaNotify-TV-2.2.0.apk)
-- [CasaNotify Controle 2.2.0 — cadastro, login e ajustes no celular](downloads/CasaNotify-Controle-2.2.0.apk)
-- [CasaNotify Celular 2.2.0 — controle com espelhamento opcional](downloads/CasaNotify-Celular-2.2.0.apk)
+- [CasaNotify TV 2.3.0 — instalar na TV/receptor](downloads/CasaNotify-TV-2.3.0.apk)
+- [CasaNotify Controle 2.3.0 — cadastro, login e ajustes no celular](downloads/CasaNotify-Controle-2.3.0.apk)
+- [CasaNotify Celular 2.3.0 — controle com espelhamento opcional](downloads/CasaNotify-Celular-2.3.0.apk)
 - [Integração Home Assistant 2.1.0](downloads/CasaNotify-TV-Integracao-HA-2.1.0.zip)
 - [Código completo](https://github.com/Douglaslopes24/Casanotify-tv-/archive/refs/heads/main.zip)
 - [Instalação passo a passo](docs/INSTALACAO.md)
 
-Instale a edição TV no receptor e Controle no celular. As três edições mantêm o identificador e a assinatura originais; uma substitui a outra no mesmo aparelho. Atualize sem apagar os dados. Certificado HTTPS, senha, câmeras e identidade da TV são preservados para quem vem da 2.0.1/2.1.0.
+Instale a edição TV no receptor e **Celular** no telefone para controlar a TV e espelhar avisos. A edição Controle é uma alternativa sem leitura de notificações. As três edições mantêm o identificador e a assinatura originais; uma substitui a outra no mesmo aparelho. Atualize sem apagar os dados. Certificado HTTPS, senha, câmeras, identidade e vínculos existentes são preservados ao atualizar da 2.2.0, sem apagar dados.
 
-**Atualize também a integração para 2.1.0.** A API 3 exige prova criptográfica da chave vinculada em cada comando. Os clientes antigos deixam de comandar a TV. No app Controle, faça um vínculo inicial em **Perfil → Vincular controle / criar conta** na TV; depois use seu usuário e senha existentes, sem segundo fator ou SMS. O Home Assistant atualizado reaproveita sua chave existente.
+**A integração permanece em 2.1.0; se já usa essa versão, não precisa reinstalá-la.** A API 3 exige prova criptográfica da chave vinculada em cada comando. Os clientes antigos deixam de comandar a TV. No app Controle, faça um vínculo inicial em **Perfil → Vincular controle / criar conta** na TV; depois use seu usuário e senha existentes e mantenha **Manter conectado** marcado. Os próximos acessos restauram a sessão automaticamente, sem segundo fator ou SMS. O Home Assistant atualizado reaproveita sua chave existente.
 
 O primeiro cadastro, login e todos os ajustes ficam dentro do aplicativo de controle. A TV **não serve mais painel nem tela de login ao navegador**. Os 10 MP3s enviados foram adicionados aos 6 toques existentes.
 TV e Controle não incluem leitor de notificações de outros aplicativos. A edição Celular adiciona o espelhamento opcional e continua sujeita às restrições do Android/Play Protect. Nenhuma edição tem aprovação garantida do Google. [Entenda os avisos das capturas](docs/SEGURANCA_ANDROID.md).
 
 **Integração 2.1.0:** conexão HTTPS com certificado aprovado, comandos autenticados com desafio de uso único e 16 opções de toque. As 37 entidades e seus identificadores permanecem estáveis.
-## Novidades
+## Novidades da 2.3.0
+
+- Busca automática da TV por mDNS e recuperação do IP após mudanças na rede, conferindo o certificado e a identidade já aprovados.
+- Primeiro vínculo preservado e acesso automático com autorização cifrada. A senha não é salva.
+- O primeiro login na edição Celular vincula também os avisos, sem outro IP ou código. Permissão e seleção dos aplicativos continuam sob seu controle.
+- Entrega independente da tela aberta, com fila cifrada de até 30 avisos, expiração de 10 minutos e novas tentativas por `JobScheduler`. Respeita restrições e permissões do Android.
+- Ajustes do celular organizados em Minha TV, Avisos, Conexão em segundo plano, Aplicativos autorizados e Seu espaço; busca por aplicativo e diagnóstico de pendências.
+- Painel com cartões, campos maiores e navegação adaptada ao celular.
+
+## Recursos
 
 - Aplicativo de controle com cadastro e login por usuário/senha, conectado por HTTPS à TV. Sem autenticação de dois fatores nem SMS.
 - Cadastro com aceite dos termos e agradecimento com o nome escolhido; alteração de nome e senha; recuperação presencial pela TV.
@@ -63,7 +72,7 @@ Use `notify.send_message` para mensagens simples ou `casanotify_tv.send_notifica
 
 O controle usa a porta HTTPS `8766` e valida o certificado da TV aprovado no primeiro vínculo. A tela é empacotada no APK, em uma WebView sem navegação externa; somente o transporte Android se comunica com a TV. Redirecionamentos e identidades diferentes são recusados. A porta `8765` identifica publicamente a TV, sem receber senhas. Os comandos da API 3 exigem HMAC-SHA256 com uma chave vinculada e um desafio de uso único. O HTTP não redireciona nem recebe comandos. Apenas identificação, emissão de desafio e pareamento inicial são públicos; comandos, login, dados e imagens exigem vínculo.
 
-A conta é de um proprietário local por TV. Senha usa PBKDF2-HMAC-SHA256 com 600.000 iterações; segredos, credenciais e câmeras ficam cifrados com Android Keystore. Sessões usam cookies Secure/HttpOnly/SameSite, proteção CSRF, 30 minutos de inatividade e limite absoluto de 12 horas. O app de controle guarda a sessão somente na memória; pede login novamente ao ser recriado. A atualização remove os segredos TOTP antigos, mantendo o hash da senha e o bloqueio de tentativas. Cinco falhas bloqueiam login por cinco minutos. Não exponha o receptor diretamente à Internet.
+A conta é de um proprietário local por TV. Senha usa PBKDF2-HMAC-SHA256 com 600.000 iterações; segredos, credenciais e câmeras ficam cifrados com Android Keystore. Sessões usam cookies Secure/HttpOnly/SameSite, proteção CSRF, 30 minutos de inatividade e limite absoluto de 12 horas. O app guarda a sessão somente na memória; se Manter conectado foi autorizado, uma credencial cifrada e exclusiva desse controle restaura o acesso após fechar ou reiniciar. Sair da conta, trocar a senha ou revogar o controle cancela esse acesso. A atualização remove os segredos TOTP antigos, mantendo o hash da senha e o bloqueio de tentativas. Cinco falhas bloqueiam login por cinco minutos. Não exponha o receptor diretamente à Internet.
 
 O espelhamento recebe credenciais limitadas ao envio de avisos. Cada controle tem sua própria chave, além da sessão do proprietário vinculada a esse controle. Os vínculos podem ser revogados. A proteção comprova posse da chave; não identifica de forma infalível o programa que a usa caso um aparelho ou chave seja comprometido. O filtro adicional de palavras sensíveis é conservador e não garante detectar todo segredo; mantenha o conteúdo desativado quando não quiser mensagens na TV. RTSP pode trafegar sem criptografia: use rede confiável ou VPN. VPN não fornece servidor e pode impedir descoberta local. A TV precisa estar ligada, conectada e permitir sobreposição. Samsung Tizen e LG webOS não executam o APK diretamente.
 
@@ -71,4 +80,4 @@ O espelhamento recebe credenciais limitadas ao envio de avisos. Cada controle te
 
 Código Android em `android/`; integração em `custom_components/casanotify_tv/`. Não há chaves privadas de assinatura no repositório. Veja [compilação](android/README.md), [API](android/API.md), [testes e limites da validação](docs/VALIDACAO.md) e [atualizações](CHANGELOG.md).
 
-Consulte [o relatório de segurança 2.2](docs/SEGURANCA_2_2.md) e [os resultados de validação](docs/VALIDACAO.md). Os testes de ataque foram feitos em processos e servidores de teste locais, sem acessar a TV do usuário. Ainda é necessário testar instalação, áudio, sobreposição, câmera e VPN nos aparelhos físicos. Não há garantia de aprovação pelo Play Protect.
+Consulte [o relatório da versão 2.3](docs/SEGURANCA_2_3.md) e [os resultados de validação](docs/VALIDACAO.md). Os testes de ataque foram feitos em processos e servidores de teste locais, sem acessar a TV do usuário. Ainda é necessário testar instalação, áudio, sobreposição, câmera e VPN nos aparelhos físicos. Não há garantia de aprovação pelo Play Protect.

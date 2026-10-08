@@ -1,5 +1,16 @@
 # Histórico
 
+## Aplicativos 2.3.0 — 08/10/2026
+
+- Descoberta automática da TV, recuperação autenticada do IP e preservação do primeiro vínculo.
+- Manter conectado com autorização cifrada vinculada ao controle, sem armazenar senha. Logout, alteração de senha e revogação impedem a retomada.
+- Primeiro login da edição Celular cria a credencial limitada dos avisos; sem segundo pareamento. Credenciais legadas são preservadas.
+- Notificações independentes da Activity, rebind autorizado, retomada no boot/atualização, reação à rede e fila cifrada com até 30 itens e prazo de 10 minutos, reagendada pelo Android.
+- Ajustes do celular em cartões com busca de aplicativos, diagnóstico e reparo explícito de vínculo. Painel adaptado a telas pequenas.
+- Limite de avisos retorna 429, sem confundir congestionamento com revogação.
+- Integração HA permanece 2.1.0, API 3 e 37 entidades; assinatura Android original, versionCode 8.
+
+
 ## Aplicativos 2.2.0 e integração 2.1.0 — 03/10/2026
 
 - API 3: prova HMAC-SHA256 com desafio de uso único por comando, dentro de HTTPS fixado. Rejeição de comandos alterados, expirados e repetidos. Sem segredo compartilhado por todos os APKs.

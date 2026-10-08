@@ -1,6 +1,15 @@
 # Validação — CasaNotify TV
 
-Última revisão da integração e dos aplicativos: 03/10/2026.
+Última revisão da integração e dos aplicativos: 08/10/2026.
+
+## Aplicativos 2.3.0 / integração 2.1.0 — conexão e segundo plano
+
+- **59 testes Java aprovados**, incluindo autenticação persistente vinculada ao controle e fila com expiração, limite, persistência e isolamento de destino, além dos testes de TLS e ataques locais anteriores.
+- **71 testes Python aprovados** com Home Assistant 2026.9.3/Python 3.14.7 e Ruff aprovado. API 3, integração 2.1.0 e 37 entidades preservadas.
+- **Dois fluxos DOM aprovados**, painel e transporte nativo simulado, incluindo a opção de manter conectado.
+- Três APKs 2.3.0, versionCode 8, API mínima 26 e alvo 35; assinatura original, alinhamento, permissões e os dez MP3s conferidos. Leitor de notificações ausente nas edições TV/Controle.
+- Chromium foi baixado, mas o ambiente impediu sua execução ao negar a criação de socket. A interface nativa, o mDNS e o comportamento em segundo plano não foram executados em aparelhos físicos ou emulador. Nenhuma aprovação do Play Protect foi obtida.
+- [Escopo, alterações de segurança e roteiro nos aparelhos](SEGURANCA_2_3.md). Os registros abaixo são históricos.
 
 ## Aplicativos 2.2.0 / integração 2.1.0 — segurança e sons
 
