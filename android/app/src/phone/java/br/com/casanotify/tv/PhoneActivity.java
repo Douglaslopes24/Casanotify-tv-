@@ -58,7 +58,7 @@ public final class PhoneActivity extends Activity {
         Ui.button(this,personal,"Termos e privacidade",()->Ui.termsDialog(this,!Ui.accepted(this),null));
         Ui.button(this,personal,"Autorizar novamente os avisos",()->new AlertDialog.Builder(this).setTitle("Renovar autorização de avisos?").setMessage("Use se você revogou a chave de avisos na TV. O controle precisa estar conectado à sua conta. Uma nova chave limitada será criada, sem repetir IP ou código.").setPositiveButton("Autorizar",(d,w)->repairLink()).setNegativeButton("Cancelar",null).show());
         Ui.button(this,personal,"Remover vínculo dos avisos",()->new AlertDialog.Builder(this).setTitle("Desligar e remover vínculo?").setMessage("O controle da TV continua disponível. Os avisos pendentes serão apagados. Você pode revogar a chave também em Conta e conexões.").setPositiveButton("Remover",(d,w)->{settings.edit().putBoolean("enabled",false).putBoolean("mirror_unlinked",true).apply();synchronized(TvLink.class){new SecretStore(this,"phone_target").delete();}MirrorSender.clear(this);MirrorConnectionService.stop(this);refresh();}).setNegativeButton("Cancelar",null).show());
-        page.addView(Ui.text(this,"CasaNotify Celular · 2.4.0\nObrigado por conectar sua casa.",14));
+        page.addView(Ui.text(this,"CasaNotify Celular · 2.4.1\nObrigado por conectar sua casa.",14));
         Ui.button(this,page,"Voltar ao controle",this::finish);
         if(!Ui.accepted(this))page.post(()->Ui.termsDialog(this,true,()->{if(settings.getBoolean("enabled",false))notificationPermission();MirrorSender.foreground(this);refresh();}));
         restoreLink();

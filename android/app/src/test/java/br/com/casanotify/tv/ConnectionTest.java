@@ -61,4 +61,11 @@ public class ConnectionTest {
     @Test public void acknowledgementsCannotDeleteAnotherBindingOrUnknownId()throws Exception{
         MirrorOutbox queue=new MirrorOutbox(store,clock);queue.enqueue("tv","app",message("one"));queue.acknowledge("other","one");queue.acknowledge("tv","unknown");assertEquals(1,queue.size());queue.acknowledge("tv","one");assertEquals(0,queue.size());
     }
+ @Test public void credentialBindingRejectsAnotherKeyOrReceiverButAllowsIpChange()throws Exception{
+  JSONObject saved=new JSONObject().put("device_id","tv-a").put("tls_fingerprint","a".repeat(64)).put("token","key-a").put("host","192.168.0.1");
+  assertTrue(TvIdentity.sameCredential(saved,new JSONObject(saved.toString()).put("host","192.168.0.2")));
+  for(String field:new String[]{"device_id","tls_fingerprint","token"})assertFalse(TvIdentity.sameCredential(saved,new JSONObject(saved.toString()).put(field,"changed")));
+  assertFalse(TvIdentity.sameCredential(saved,null));assertFalse(TvIdentity.sameCredential(null,saved));assertFalse(TvIdentity.sameCredential(new JSONObject(),new JSONObject()));
+ }
+
 }

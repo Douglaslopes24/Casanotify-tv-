@@ -5,6 +5,7 @@ import hashlib
 import hmac
 import ipaddress
 import json
+import math
 import re
 import uuid
 
@@ -29,6 +30,76 @@ def normalize_host(host: str) -> str:
     if address.is_unspecified or address.is_multicast:
         raise ValueError("Use the IPv4 address displayed on the TV")
     return str(address)
+
+
+def bounded_json(raw: bytes) -> dict:
+    """Bound parser work before decoding; reject ambiguous or non-standard JSON."""
+    if len(raw) > 131072:
+        raise CasaNotifyError("Response exceeds 128 KiB")
+    text = raw.decode("utf-8")
+    depth = separators = 0
+    quoted = escaped = False
+    for char in text:
+        if quoted:
+            if escaped:
+                escaped = False
+            elif char == "\\":
+                escaped = True
+            elif char == '"':
+                quoted = False
+        elif char == '"':
+            quoted = True
+        elif char in "[{":
+            depth += 1
+            if depth > 17:
+                raise ValueError("JSON nesting limit")
+        elif char in "]}":
+            depth -= 1
+        elif char in ",:":
+            separators += 1
+            if separators > 8192:
+                raise ValueError("JSON structure limit")
+
+    def number(value):
+        if len(value) > 64:
+            raise ValueError("JSON number limit")
+        result = float(value) if any(c in value for c in ".eE") else int(value)
+        if not math.isfinite(result):
+            raise ValueError("Non-finite JSON number")
+        return result
+
+    def reject_constant(_):
+        raise ValueError("Invalid JSON constant")
+
+    def unique_object(pairs):
+        result = {}
+        for key, value in pairs:
+            if key in result or len(key) > 128:
+                raise ValueError("Duplicate or oversized JSON key")
+            result[key] = value
+        return result
+
+    result = json.loads(
+        text,
+        object_pairs_hook=unique_object,
+        parse_int=number,
+        parse_float=number,
+        parse_constant=reject_constant,
+    )
+    if not isinstance(result, dict):
+        raise ValueError("Invalid JSON object")
+    pending = [result]
+    count = 0
+    while pending:
+        value = pending.pop()
+        count += 1
+        if count > 4096:
+            raise ValueError("JSON value limit")
+        if isinstance(value, dict):
+            pending.extend(value.values())
+        elif isinstance(value, list):
+            pending.extend(value)
+    return result
 
 
 class CasaNotifyApi:
@@ -66,7 +137,7 @@ class CasaNotifyApi:
         body = (
             json.dumps(data, ensure_ascii=False, separators=(",", ":")).encode() if data is not None else None
         )
-        headers = {"Accept": "application/json"}
+        headers = {"Accept": "application/json", "Accept-Encoding": "identity"}
         if body is not None:
             headers["Content-Type"] = "application/json"
         if authenticate:
@@ -111,27 +182,31 @@ class CasaNotifyApi:
                     data=body,
                     headers=headers,
                     allow_redirects=False,
+                    auto_decompress=False,
                 ) as response,
             ):
                 if response.status in (401, 403):
                     raise InvalidAuth("Access refused by TV")
                 if path == "/api/info" and response.status == 404:
                     raise UnsupportedDevice("Install CasaNotify TV 2.2.0 or later")
+                if response.headers.get("Content-Encoding", "identity").lower().strip() != "identity":
+                    raise CasaNotifyError("Compressed responses are not supported")
+                length = response.headers.get("Content-Length")
+                if length is not None and (len(length) > 10 or int(length) > 131072):
+                    raise CasaNotifyError("Response exceeds 128 KiB")
                 body = bytearray()
                 async for part in response.content.iter_chunked(8192):
                     body.extend(part)
                     if len(body) > 131072:
                         raise CasaNotifyError("Response exceeds 128 KiB")
-                payload = json.loads(body)
-                if not isinstance(payload, dict):
-                    raise CasaNotifyError("Invalid JSON object")
+                payload = bounded_json(body)
                 if not 200 <= response.status < 300:
                     # No raw server text, notification contents or credentials in logs.
                     raise CasaNotifyError(f"TV returned HTTP {response.status}")
                 return payload
         except aiohttp.ServerFingerprintMismatch as err:
             raise InvalidAuth("TV certificate changed: compare it on the TV and pair again") from err
-        except (aiohttp.ClientError, TimeoutError, ValueError) as err:
+        except (aiohttp.ClientError, TimeoutError, ValueError, RecursionError) as err:
             raise CasaNotifyError("Could not communicate with TV") from err
 
     async def info(self):
@@ -147,8 +222,8 @@ class CasaNotifyApi:
         if info.get("app") != "CasaNotify TV" or info.get("api_version") != 3:
             raise UnsupportedDevice("Unsupported app or API")
         try:
-            for field in ("device_name", "version"):
-                if not isinstance(info[field], str) or not info[field].strip():
+            for field, limit in (("device_name", 60), ("version", 40)):
+                if not isinstance(info[field], str) or not info[field].strip() or len(info[field]) > limit:
                     raise ValueError("Missing device name or version")
             uuid.UUID(info["device_id"])
             if not re.fullmatch(r"[0-9a-fA-F]{64}", info["tls_fingerprint"]):

@@ -75,6 +75,32 @@ class CasaNotifyConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         except ValueError, CasaNotifyError:
             return self.async_abort(reason="cannot_connect")
         await self.async_set_unique_id(self.info["device_id"])
+        existing = next(
+            (entry for entry in self._async_current_entries() if entry.unique_id == self.unique_id),
+            None,
+        )
+        if existing:
+            saved = dict(existing.data)
+            if (saved[CONF_HOST], saved[CONF_PORT]) == (self.host, self.port):
+                return self.async_abort(reason="already_configured")
+            # mDNS and /api/info are hints, never proof of a receiver's identity.
+            # Authenticate the candidate with the OLD certificate, port and key.
+            try:
+                trusted = CasaNotifyApi(
+                    async_get_clientsession(self.hass),
+                    self.host,
+                    self.port,
+                    saved[CONF_TOKEN],
+                    saved.get("tls_fingerprint", ""),
+                    saved.get("tls_port", 8766),
+                )
+                status = await trusted.status()
+                if status.get("device_id") != existing.unique_id:
+                    return self.async_abort(reason="wrong_device")
+            except ValueError, CasaNotifyError:
+                return self.async_abort(reason="cannot_connect")
+            if dict(existing.data) != saved:
+                return self.async_abort(reason="already_configured")
         self._abort_if_unique_id_configured(updates={CONF_HOST: self.host, CONF_PORT: self.port})
         self.context["title_placeholders"] = {"name": self.info["device_name"]}
         return await self.async_step_pair()

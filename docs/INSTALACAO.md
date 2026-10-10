@@ -1,10 +1,12 @@
-# Instalar CasaNotify 2.4.0
+# Instalar CasaNotify 2.4.1
 
 ## Atualizar sem perder o vínculo
 
-Instale **CasaNotify-TV-2.4.0.apk** na TV e **CasaNotify-Celular-2.4.0.apk** no telefone, como atualização, sem apagar os dados. Para usar somente o controle, há **CasaNotify-Controle-2.4.0.apk**, sem leitor de notificações. As três edições usam o mesmo identificador e assinatura: uma substitui a outra no mesmo aparelho.
+Instale **CasaNotify-TV-2.4.1.apk** na TV e **CasaNotify-Celular-2.4.1.apk** no telefone, como atualização, sem apagar os dados. Para usar somente o controle, há **CasaNotify-Controle-2.4.1.apk**, sem leitor de notificações. As três edições usam o mesmo identificador e assinatura: uma substitui a outra no mesmo aparelho.
 
-Atualize a integração Home Assistant para **2.2.0** e reinicie o HA, mantendo a integração existente. As 37 entidades, seus IDs, a conta, o certificado e os vínculos das versões 2.2/2.3 são preservados. Abra os apps e aceite os termos atualizados. Na TV, deixe o receptor ativo; no celular, confira os ajustes de avisos para ativar o serviço contínuo.
+Atualize a integração Home Assistant para **2.2.1** e reinicie o HA, mantendo a integração existente. As 37 entidades, seus IDs, a conta, o certificado e os vínculos das versões 2.2/2.3/2.4 são preservados. Abra os apps. Os termos permanecem na versão de 09/10/2026; quem já os aceitou na 2.4.0 não recebe novo aceite por esta correção. Na TV, deixe o receptor ativo; no celular, confira os ajustes de avisos para ativar o serviço contínuo.
+
+A 2.2.1 verifica a identidade da TV antes de salvar um IP descoberto. Se um anúncio falso tiver alterado o endereço na versão anterior e a recuperação automática não ocorrer, use **Reconfigurar** na integração existente e informe o IP exibido na TV. Confira o certificado na própria TV; não desative sua verificação.
 
 ## 1. TV receptora
 
@@ -55,11 +57,11 @@ A fila cifrada comporta até 30 avisos recentes, com prazo de dez minutos. Ao re
 
 Avisos secretos, permanentes, resumos e conteúdo sensível identificado pelo filtro são omitidos. Se o Android negar acesso, o espelhamento não funciona; o app respeita essa restrição.
 
-## 5. Home Assistant 2.2.0
+## 5. Home Assistant 2.2.1
 
 Requer Home Assistant 2026.9+. No **HACS → Repositórios personalizados**, adicione `https://github.com/Douglaslopes24/Casanotify-tv-`, categoria **Integração**. Baixe CasaNotify TV e reinicie o HA.
 
-Para instalação manual, extraia **CasaNotify-TV-Integracao-HA-2.2.0.zip**, substitua `/config/custom_components/casanotify_tv` e reinicie. O `manifest.json` deve indicar `"version": "2.2.0"`. Não exclua a integração existente para atualizar.
+Para instalação manual, extraia **CasaNotify-TV-Integracao-HA-2.2.1.zip**, substitua `/config/custom_components/casanotify_tv` e reinicie. O `manifest.json` deve indicar `"version": "2.2.1"`. Não exclua a integração existente para atualizar.
 
 No primeiro vínculo:
 

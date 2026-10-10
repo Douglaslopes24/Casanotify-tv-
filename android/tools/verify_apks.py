@@ -41,11 +41,16 @@ def main():
         manifest = run(tools / 'aapt', 'dump', 'xmltree', apk, 'AndroidManifest.xml')
         permissions = set(re.findall(r"uses-permission: name='([^']+)'", badging))
         assert permissions == (common | receiver if edition == 'tv' else common | discovery | ({'android.permission.RECEIVE_BOOT_COMPLETED', 'android.permission.FOREGROUND_SERVICE', 'android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE', 'android.permission.POST_NOTIFICATIONS', 'android.permission.WAKE_LOCK'} if edition == 'phone' else set())), permissions
-        assert "name='br.com.casanotify.tv' versionCode='9' versionName='2.4.0'" in badging
+        assert "name='br.com.casanotify.tv' versionCode='10' versionName='2.4.1'" in badging
         assert "sdkVersion:'26'" in badging and "targetSdkVersion:'35'" in badging
         with zipfile.ZipFile(apk) as archive:
             assert archive.testzip() is None
             dex = b''.join(archive.read(n) for n in archive.namelist() if n.endswith('.dex'))
+            for component in ('BoundedJson', 'NetworkDeadline'):
+                assert f'Lbr/com/casanotify/tv/{component};'.encode() in dex, 'Missing network guard'
+            if edition != 'tv':
+                assert b'sameCredential' in dex, 'Missing session binding guard'
+                assert b'CasaNotifyAndroidRemote240' in dex, 'Remote Keystore alias changed'
             sounds = json.loads((pathlib.Path(__file__).resolve().parents[2] / 'docs/SONS.json').read_text())
             assert len(sounds) == 10
             for sound in sounds:

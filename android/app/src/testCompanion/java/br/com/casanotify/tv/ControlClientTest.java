@@ -3,10 +3,10 @@ import org.junit.*;import static org.junit.Assert.*;import org.json.*;import jav
 
 public class ControlClientTest {
     private static final String COOKIE="__Host-casanotify="+"a".repeat(43);
-    private static class Reply extends HttpsURLConnection {
-        int status=200;String setCookie=COOKIE+"; Path=/; Secure; HttpOnly",payload="{\"ok\":true}",type="application/json";boolean disconnected;ByteArrayOutputStream sent=new ByteArrayOutputStream();
+    static class Reply extends HttpsURLConnection {
+        int status=200;String setCookie=COOKIE+"; Path=/; Secure; HttpOnly",payload="{\"ok\":true}",type="application/json";volatile boolean disconnected;String encoding;ByteArrayOutputStream sent=new ByteArrayOutputStream();
         Reply(URL url){super(url);if(url.getPath().equals("/api/challenge")){payload="{\"challenge\":\"fixture\"}";setCookie=null;}else if(!url.getPath().equals("/auth/login"))setCookie=null;}public void connect(){}public void disconnect(){disconnected=true;}public boolean usingProxy(){return false;}public String getCipherSuite(){return "TLS_AES_128_GCM_SHA256";}public Certificate[] getLocalCertificates(){return null;}public Certificate[] getServerCertificates(){return null;}
-        public int getResponseCode(){return status;}public String getHeaderField(String name){return name.equals("Set-Cookie")?setCookie:null;}public String getContentType(){return type;}public InputStream getInputStream(){return new ByteArrayInputStream(payload.getBytes(StandardCharsets.UTF_8));}public InputStream getErrorStream(){return getInputStream();}public OutputStream getOutputStream(){return sent;}
+        public int getResponseCode(){return status;}public String getHeaderField(String name){return name.equals("Set-Cookie")?setCookie:name.equals("Content-Encoding")?encoding:null;}public String getContentType(){return type;}public InputStream getInputStream(){return new ByteArrayInputStream(payload.getBytes(StandardCharsets.UTF_8));}public InputStream getErrorStream(){return getInputStream();}public OutputStream getOutputStream(){return sent;}
     }
     @Test public void destinationAndRoutesRejectArbitraryNetworkAndMethod()throws Exception{
         assertEquals("192.168.0.10",ControlClient.ipv4("192.168.000.010"));
@@ -31,4 +31,15 @@ public class ControlClientTest {
             server.start();ControlClient.ConnectionFactory local=url->(HttpURLConnection)new URL("https://127.0.0.1:"+server.port()+url.getPath()).openConnection();ControlClient valid=new ControlClient("192.168.0.10",CertificatePin.socketFactory(pin),"fixture token",local);assertTrue(valid.request("/auth/login","POST","{\"password\":\"fixture password\"}","").getJSONObject("data").getBoolean("ok"));assertEquals(1,reached.get());ControlClient changed=new ControlClient("192.168.0.10",CertificatePin.socketFactory("0".repeat(64)),"fixture token",local);try{changed.request("/auth/login","POST","{\"password\":\"must not arrive\"}","");fail();}catch(SSLException expected){}assertEquals(1,reached.get());
         }
     }
+    @Test public void malformedAndCompressedResponsesAreRejected()throws Exception{
+        for(String attack:new String[]{"duplicate","deep","compressed"}){
+            ControlClient client=new ControlClient("192.168.0.10",CertificatePin.socketFactory("a".repeat(64)),"fixture token",url->{Reply r=new Reply(url);if(!url.getPath().equals("/api/challenge")){r.payload=attack.equals("deep")?"{\"x\":"+"[".repeat(1000)+"0"+"]".repeat(1000)+"}":"{\"x\":1,\"x\":2}";if(attack.equals("compressed"))r.encoding="gzip";}return r;});
+            try{client.request("/api/status","GET",null,"");fail(attack);}catch(IllegalArgumentException|IOException expected){}
+        }
+    }
+    @Test public void absoluteClientDeadlineInterruptsSlowResponseHeaders()throws Exception{
+        Reply[] last=new Reply[1];ControlClient client=new ControlClient("192.168.0.10",CertificatePin.socketFactory("a".repeat(64)),"fixture token",url->last[0]=new Reply(url){@Override public int getResponseCode(){while(!disconnected){try{Thread.sleep(10);}catch(InterruptedException e){Thread.currentThread().interrupt();break;}}return 408;}},250);
+        long start=System.nanoTime();try{client.request("/api/status","GET",null,"");fail();}catch(Exception expected){}assertTrue(last[0].disconnected);assertTrue(java.util.concurrent.TimeUnit.NANOSECONDS.toMillis(System.nanoTime()-start)<1500);
+    }
+
 }

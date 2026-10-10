@@ -27,7 +27,7 @@ public final class DiscoveryAdvertiser implements AutoCloseable {
         info.setAttribute("id", id);
         info.setAttribute("api", "3");
         info.setAttribute("name", prefs.config().optString("device_name","Minha TV"));
-        info.setAttribute("version", "2.4.0");
+        info.setAttribute("version", "2.4.1");
         listener = new NsdManager.RegistrationListener() {
             public void onServiceRegistered(NsdServiceInfo service) {
                 registered = true;

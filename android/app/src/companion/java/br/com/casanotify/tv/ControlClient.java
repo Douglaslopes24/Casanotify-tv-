@@ -13,10 +13,11 @@ public final class ControlClient {
     private static final Set<String> READ=new HashSet<>(Arrays.asList("/api/hello","/auth/state","/auth/session","/api/config","/api/status","/api/history","/api/phones","/media/logo","/media/background"));
     private static final Set<String> WRITE=new HashSet<>(Arrays.asList("/api/phones/link","/auth/resume","/auth/register","/auth/login","/auth/logout","/auth/profile","/auth/password","/api/config","/api/notify","/api/clear","/api/media","/api/media/remove","/api/phones/revoke"));
     interface ConnectionFactory { HttpURLConnection open(URL url)throws Exception; }
-    private final String host,token;private final SSLSocketFactory tls;private final ConnectionFactory factory;
+    private final String host,token;private final SSLSocketFactory tls;private final ConnectionFactory factory;private final long requestTimeout;
     private String cookie="";
     public ControlClient(String host,SSLSocketFactory tls,String token){this(host,tls,token,url->(HttpURLConnection)url.openConnection());}
-    ControlClient(String host,SSLSocketFactory tls,String token,ConnectionFactory factory){this.host=ipv4(host);this.token=token;this.tls=Objects.requireNonNull(tls);this.factory=factory;}
+    ControlClient(String host,SSLSocketFactory tls,String token,ConnectionFactory factory){this(host,tls,token,factory,15000);}
+    ControlClient(String host,SSLSocketFactory tls,String token,ConnectionFactory factory,long requestTimeout){this.requestTimeout=requestTimeout;this.host=ipv4(host);this.token=token;this.tls=Objects.requireNonNull(tls);this.factory=factory;}
     public static String ipv4(String text){
         if(text==null)throw new IllegalArgumentException("Informe o IP mostrado na TV.");String[] parts=text.trim().split("\\.",-1);if(parts.length!=4)throw new IllegalArgumentException("Informe somente o IPv4 da TV, por exemplo 192.168.0.10.");StringBuilder result=new StringBuilder();
         for(String p:parts){if(!p.matches("[0-9]{1,3}")||Integer.parseInt(p)>255)throw new IllegalArgumentException("IP inválido.");if(result.length()>0)result.append('.');result.append(Integer.parseInt(p));}
@@ -30,18 +31,23 @@ public final class ControlClient {
     static byte[] read(InputStream in,int limit)throws IOException{
         if(in==null)return new byte[0];try(InputStream stream=in;ByteArrayOutputStream out=new ByteArrayOutputStream()){byte[] b=new byte[8192];int n;while((n=stream.read(b))!=-1){if(out.size()+n>limit)throw new IOException("Resposta muito grande.");out.write(b,0,n);}return out.toByteArray();}
     }
+    static void checkResponse(HttpURLConnection c,int limit)throws IOException{
+        String encoding=c.getHeaderField("Content-Encoding");if(encoding!=null&&!encoding.trim().equalsIgnoreCase("identity"))throw new IOException("Resposta comprimida não aceita.");
+        if(c.getContentLengthLong()>limit)throw new IOException("Resposta muito grande.");
+    }
     public static JSONObject discover(String input)throws Exception{
-        String host=ipv4(input);HttpURLConnection c=(HttpURLConnection)new URL("http://"+host+":8765/api/info").openConnection();c.setConnectTimeout(5000);c.setReadTimeout(5000);c.setInstanceFollowRedirects(false);c.setUseCaches(false);
-        try{if(c.getResponseCode()!=200)throw new IOException("Ative o receptor na TV e confira o IP.");JSONObject info=new JSONObject(new String(read(c.getInputStream(),65536),StandardCharsets.UTF_8));
-            if(!"CasaNotify TV".equals(info.optString("app"))||info.optInt("api_version")!=3||info.optInt("control_protocol")!=2||!info.optString("tls_fingerprint").matches("[0-9a-f]{64}"))throw new IOException("Atualize o aplicativo da TV para a versão 2.4.0 ou posterior.");
+        String host=ipv4(input);HttpURLConnection c=(HttpURLConnection)new URL("http://"+host+":8765/api/info").openConnection();c.setConnectTimeout(5000);c.setReadTimeout(5000);c.setInstanceFollowRedirects(false);c.setUseCaches(false);c.setRequestProperty("Accept-Encoding","identity");
+        try(NetworkDeadline deadline=new NetworkDeadline(10000,c::disconnect)){if(c.getResponseCode()!=200)throw new IOException("Ative o receptor na TV e confira o IP.");checkResponse(c,65536);JSONObject info=BoundedJson.object(read(c.getInputStream(),65536),65536);
+            if(!"CasaNotify TV".equals(info.optString("app"))||info.optInt("api_version")!=3||info.optInt("control_protocol")!=2||!info.optString("tls_fingerprint").matches("[0-9a-f]{64}"))throw new IOException("Atualize o aplicativo da TV para a versão 2.4.1 ou posterior.");
+            if(info.optString("device_name").length()>60||info.optString("version").length()>40)throw new IOException("Identidade da TV inválida.");java.util.UUID.fromString(info.getString("device_id"));
             return new JSONObject().put("host",host).put("device_name",info.optString("device_name","Minha TV")).put("device_id",info.getString("device_id")).put("tls_fingerprint",info.getString("tls_fingerprint"));
         }finally{c.disconnect();}
     }
     public synchronized void forgetSession(){cookie="";}
     public synchronized JSONObject request(String path,String method,String body,String csrf)throws Exception{
-        validate(path,method,body);if(body!=null)new JSONObject(body);
+        validate(path,method,body);if(body!=null)BoundedJson.checkObject(body,1550000);
         if(token==null||token.isEmpty())throw new IOException("Vincule novamente o controle à TV.");
-        JSONObject challenge=exchange("/api/challenge","GET",null,"",Collections.emptyMap()).getJSONObject("data");
+        JSONObject answer=exchange("/api/challenge","GET",null,"",Collections.emptyMap());if(answer.getInt("status")!=200)throw new IOException("A TV recusou a autenticação do comando.");JSONObject challenge=answer.getJSONObject("data");
         Map<String,String> headers=RequestAuth.sign(RequestAuth.clientId(token),token,method,path,challenge.getString("challenge"),body,cookie,csrf);
         return exchange(path,method,body,csrf,headers);
     }
@@ -51,19 +57,19 @@ public final class ControlClient {
     }
     private JSONObject exchange(String path,String method,String body,String csrf,Map<String,String> headers)throws Exception{
         URL url=new URL("https://"+host+":8766"+path);HttpsURLConnection c=(HttpsURLConnection)factory.open(url);
-        c.setSSLSocketFactory(tls);c.setHostnameVerifier((name,session)->name.equals(host));c.setConnectTimeout(5000);c.setReadTimeout(path.startsWith("/auth/")?60000:path.equals("/api/hello")||path.equals("/api/challenge")?4000:12000);c.setUseCaches(false);c.setInstanceFollowRedirects(false);c.setRequestMethod(method);c.setRequestProperty("Accept",path.startsWith("/media/")?"image/png":"application/json");
+        c.setSSLSocketFactory(tls);c.setHostnameVerifier((name,session)->name.equals(host));c.setConnectTimeout(5000);c.setReadTimeout(path.startsWith("/auth/")?60000:path.equals("/api/hello")||path.equals("/api/challenge")?4000:12000);c.setUseCaches(false);c.setInstanceFollowRedirects(false);c.setRequestMethod(method);c.setRequestProperty("Accept-Encoding","identity");c.setRequestProperty("Accept",path.startsWith("/media/")?"image/png":"application/json");
         for(Map.Entry<String,String> h:headers.entrySet())c.setRequestProperty(h.getKey(),h.getValue());
         if(!cookie.isEmpty())c.setRequestProperty("Cookie",cookie);
         if(csrf!=null&&!csrf.isEmpty()){if(!csrf.matches("[A-Za-z0-9_-]{1,100}"))throw new IllegalArgumentException("Sessão inválida.");c.setRequestProperty("X-CasaNotify-CSRF",csrf);}
-        try{
+        try(NetworkDeadline deadline=new NetworkDeadline(path.startsWith("/auth/")?75000:requestTimeout,c::disconnect)){
             if(body!=null){c.setRequestProperty("Content-Type","application/json");byte[] bytes=body.getBytes(StandardCharsets.UTF_8);c.setDoOutput(true);c.setFixedLengthStreamingMode(bytes.length);try(OutputStream out=c.getOutputStream()){out.write(bytes);}}
             int status=c.getResponseCode();if(status>=300&&status<400)throw new IOException("A TV tentou redirecionar a conexão. Confira o receptor.");
             String set=c.getHeaderField("Set-Cookie");if(set!=null){String first=set.split(";",2)[0];if(first.matches("__Host-casanotify=[A-Za-z0-9_-]{43}"))cookie=first;else if(first.equals("__Host-casanotify="))cookie="";}
             if(status==401)cookie="";
-            byte[] bytes=read(status>=400?c.getErrorStream():c.getInputStream(),LIMIT);
+            int limit=path.startsWith("/media/")&&status==200?LIMIT:131072;checkResponse(c,limit);byte[] bytes=read(status>=400?c.getErrorStream():c.getInputStream(),limit);
             JSONObject result=new JSONObject().put("status",status);
             if(path.startsWith("/media/")&&status==200){if(!"image/png".equals(c.getContentType()))throw new IOException("Formato de imagem inesperado.");return result.put("image",Base64.getEncoder().encodeToString(bytes));}
-            return result.put("data",new JSONObject(new String(bytes,StandardCharsets.UTF_8)));
+            return result.put("data",BoundedJson.object(bytes,131072));
         }finally{c.disconnect();}
     }
 }

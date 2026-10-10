@@ -62,7 +62,6 @@ async def test_discovery_requires_pairing_and_rejects_bad_code(hass, tv, mock_as
 
 
 async def test_rediscovery_updates_ip_without_duplicates(hass, entry, tv):
-    tv["info"]["tls_fingerprint"] = "cd" * 32
     result = await hass.config_entries.flow.async_init(
         "casanotify_tv", context={"source": config_entries.SOURCE_ZEROCONF}, data=discovery("192.168.1.60")
     )

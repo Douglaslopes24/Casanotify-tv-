@@ -1,5 +1,14 @@
 # Histórico
 
+## Aplicativos 2.4.1 e integração 2.2.1 — 10/10/2026
+
+- Corrige atualização de IP do HA baseada apenas em mDNS/HTTP públicos: o endereço candidato precisa provar a identidade com certificado e chave já aprovados. Protege também contra sobrepor uma reconfiguração concorrente.
+- Impõe cotas por IP e prazos absolutos de conexão/leitura/escrita, inclusive TLS inicial e respostas lentas nos companheiros.
+- Valida JSON estrito e limitado antes do parser da plataforma; rejeita duplicidade de campos, profundidade excessiva, números não finitos, UTF-8 inválido e respostas comprimidas nas APIs. Reduz parsing repetido do corpo no receptor.
+- 82 testes Java e 112 testes Python aprovados, com sockets e HTTPS reais em loopback. Relatório em `docs/SEGURANCA_2_4_1.md`.
+- Autorizações de login automático e espelhamento só são gravadas se TV, certificado e chave ainda correspondem ao vínculo que iniciou a solicitação.
+- APK versionCode 10, assinatura original, API 3/control_protocol 2 e 37 entidades preservados. Termos de 09/10/2026 mantidos; sem novo segundo fator ou pareamento obrigatório ao atualizar da 2.4.0.
+
 ## Aplicativos 2.4.0 e integração 2.2.0 — 09/10/2026
 
 - Controle nativo Android TV Remote v2: D-pad, OK, voltar, início, volume, mudo, reprodução e espera; PIN inicial, chave privada no Keystore e certificado aprovado fixado.

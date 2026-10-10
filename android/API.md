@@ -1,4 +1,4 @@
-# API local 3 · Aplicativos 2.4.0 · Integração HA 2.2.0
+# API local 3 · Aplicativos 2.4.1 · Integração HA 2.2.1
 
 Base protegida: `https://IP_DA_TV:8766`. Host IPv4 e porta obrigatórios. JSON UTF-8, `Content-Type: application/json`, `Content-Length`. Sem CORS ou redirecionamento de credenciais. TLS 1.2/1.3 com certificado da TV fixado pelo cliente após comparação física do SHA-256. Não use `verify_ssl: false`.
 
@@ -63,7 +63,11 @@ Implementações: `RequestAuth.java`, `ControlClient.java` e `custom_components/
 | GET `/media/logo`, `/media/background` | PNG privado reprocessado |
 | POST `/api/media/remove` | Remover por `kind` |
 
-Pedidos até 64 KiB; upload até 1,6 MB. Cabeçalhos até 16 KiB, trabalhadores/fila limitados e prazos de leitura. UTF-8 malformado, caracteres de controle, cabeçalhos duplicados, transferência chunked, Host ou origem não autorizados são recusados.
+Pedidos até 64 KiB; upload até 1,6 MB. Cabeçalhos até 16 KiB e 64 campos; somente GET sem corpo e POST JSON. UTF-8 malformado, cabeçalhos duplicados, transferência chunked, compressão, Host ou origem não autorizados são recusados. JSON exige objeto raiz, chaves únicas (inclusive escapes equivalentes), até 16 níveis abaixo da raiz, 4.096 valores, chaves de 128 caracteres e números finitos de até 64 caracteres.
+
+Cada listener limita a dois sockets ativos por IP e 12 no total, com quatro trabalhadores e fila de oito. Ao atingir o limite, a conexão excedente é fechada. TLS/leitura inicial têm prazo absoluto de dez segundos (a leitura HTTP também verifica oito segundos); o envio da resposta tem oito segundos. O processamento do handler tem limite de conexão de 65 segundos, sem garantia de interrupção de cálculo já iniciado. Não existe tratamento especial que dispense autenticação para clientes autorizados.
+
+Controle/Celular enviam Accept-Encoding: identity, recusam respostas comprimidas e limitam JSON a 128 KiB (descoberta do controle: 64 KiB), mantendo imagens privadas até 2 MiB. Prazos absolutos de descoberta: dez segundos; comandos: 15 segundos; rotas de conta: 75 segundos para acomodar PBKDF2. O cliente HA mantém oito segundos por pedido, limite de 128 KiB e descompressão automática desativada. Os prazos dependem de o sistema agendar o processo; são defesa da aplicação, não proteção contra saturação da rede.
 
 Toques: `soft`, `doorbell`, `chime`, `pulse`, `alarm`, `digital` e `sound_01` até `sound_10`. Nomes e hashes dos arquivos recebidos em [SONS.json](../docs/SONS.json). Campos e limites completos em `Notice.java` e no esquema do Home Assistant.
 
@@ -76,7 +80,7 @@ A API 3 exige atualizar TV, Controle/Celular e integração HA. A chave HA, os v
 
 ## Descoberta e entrega em segundo plano (2.4)
 
-O receptor anuncia `_casanotify._tcp.` com `id`, `name`, `version` e `api`. Os companheiros fazem busca NSD limitada a seis segundos, até 16 serviços e oito resultados IPv4; não varrem sub-redes. Anúncios são apenas candidatos. Ao recuperar o IP, o cliente mantém UUID, certificado e chave originais e exige resposta autenticada de `/api/hello` antes de salvar o novo endereço. Uma mudança no certificado exige nova aprovação física.
+O receptor anuncia `_casanotify._tcp.` com `id`, `name`, `version` e `api`. Os companheiros fazem busca NSD limitada a seis segundos, até 16 serviços e oito resultados IPv4; não varrem sub-redes. Anúncios são apenas candidatos. Ao recuperar o IP, o cliente mantém UUID, certificado e chave originais e exige resposta autenticada de `/api/hello` antes de salvar o novo endereço. Uma mudança no certificado exige nova aprovação física. A integração HA 2.2.1 também exige `/api/status` por TLS fixado e prova da chave anterior antes de salvar IP/porta anunciados; usa a porta TLS salva, não a sugerida pela descoberta, verifica UUID e preserva uma reconfiguração manual concorrente.
 
 O listener da edição Celular é gerenciado pelo Android. `requestRebind` é usado somente com permissão e envio autorizados; boot e atualização do pacote solicitam retomada. `MirrorConnectionService` é um foreground service `connectedDevice`, iniciado a partir da tela visível ou dos eventos permitidos de boot/atualização. Requer envio e acesso às notificações autorizados; mostra notificação com ação Pausar, usa START_STICKY e não para ao remover a tarefa dos recentes. A cada 30 segundos solicita retomada do listener e envio da fila. `JobScheduler`, com rede disponível e retentativa exponencial, complementa as tentativas. Uma trava de CPU limitada a 90 segundos cobre apenas o escoamento de avisos pendentes. Não é criada em repouso. Uma callback de rede aciona nova tentativa enquanto o listener estiver ativo. A fila AES-GCM contém até 30 avisos, com prazo de dez minutos para entrega; a exclusão dos expirados ocorre quando o processo executar novamente. Os itens ficam vinculados ao UUID, certificado e chave da TV; trocar de destino ou chave descarta os antigos. Permissão, seleção de aplicativos e preferência de conteúdo são conferidas novamente antes do envio. Desligar envio/conteúdo ou remover vínculo limpa a fila. Restrições do sistema podem adiar ou suspender captura e entrega.
 

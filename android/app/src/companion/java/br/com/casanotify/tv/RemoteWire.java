@@ -54,7 +54,7 @@ public final class RemoteWire {
             if(message.containsKey(3))throw new IOException("O serviço de controle recusou o comando.");
             if(message.containsKey(1)){
                 features=99&(int)number(parse(bytes(message,1)),1);if((features&2)==0)throw new IOException("Esta TV não aceita comandos de navegação.");configured=true;
-                byte[] info=concat(text(1,"CasaNotify"),text(2,"CasaNotify"),number(3,1),text(4,"1"),text(5,"atvremote"),text(6,"2.4.0"));return bytes(1,concat(number(1,features),bytes(2,info)));
+                byte[] info=concat(text(1,"CasaNotify"),text(2,"CasaNotify"),number(3,1),text(4,"1"),text(5,"atvremote"),text(6,"2.4.1"));return bytes(1,concat(number(1,features),bytes(2,info)));
             }
             if(message.containsKey(2)){if(!configured)throw new IOException("Controle fora de sequência.");return bytes(2,number(1,features));}
             if(message.containsKey(8)){Map<Integer,Object> ping=parse(bytes(message,8));return bytes(9,number(1,ping.containsKey(1)?number(ping,1):0));}

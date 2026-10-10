@@ -15,7 +15,7 @@ public final class ApiController implements LanServer.Handler {
     public ApiController(Context c,Prefs p,OverlayManager o)throws Exception{
         context=c;prefs=p;overlay=o;accounts=SecretStore.accounts(c);phones=PhoneTokens.get(c);cameras=new CameraStore(c);media=new MediaAssets(c);fingerprint=LocalTls.fingerprint();requestAuth=new RequestAuth(id->id.equals("ha")?new RequestAuth.Key(AuthCrypto.digest(prefs.token()),"ha"):phones.key(id));
     }
-    private JSONObject info()throws Exception{return new JSONObject().put("app","CasaNotify TV").put("version","2.4.0").put("api_version",3).put("control_protocol",2).put("auth_mode","password").put("device_id",prefs.deviceId()).put("device_name",prefs.config().optString("device_name")).put("tls_port",Prefs.SECURE_PORT).put("tls_fingerprint",fingerprint);}
+    private JSONObject info()throws Exception{return new JSONObject().put("app","CasaNotify TV").put("version","2.4.1").put("api_version",3).put("control_protocol",2).put("auth_mode","password").put("device_id",prefs.deviceId()).put("device_name",prefs.config().optString("device_name")).put("tls_port",Prefs.SECURE_PORT).put("tls_fingerprint",fingerprint);}
     private static LanServer.Response json(JSONObject o){return LanServer.Response.json(200,o.toString());}
     private static String string(JSONObject o,String k,int n)throws JSONException{return Notice.string(o,k,"",n);}
     private static String cookieId(String cookie){if(cookie==null)return "";for(String part:cookie.split(";")){String[] p=part.trim().split("=",2);if(p.length==2&&p[0].equals("__Host-casanotify")&&p[1].matches("[A-Za-z0-9_-]{43}"))return p[1];}return "";}
@@ -31,18 +31,19 @@ public final class ApiController implements LanServer.Handler {
             if(!r.secure)return LanServer.Response.error(426,"Use os aplicativos atualizados e HTTPS na porta 8766.");
             if(r.method.equals("GET")&&r.path.equals("/api/challenge"))return json(new JSONObject().put("challenge",requestAuth.challenge()));
             if(r.method.equals("POST")&&r.path.equals("/api/pair")){
-                JSONObject d=new JSONObject(r.body);String kind=Notice.option(d,"client","ha",new String[]{"ha","phone","control"});
+                JSONObject d=BoundedJson.object(r.body,65536);String kind=Notice.option(d,"client","ha",new String[]{"ha","phone","control"});
                 if(!Pairing.redeem(string(d,"code",6),kind))return LanServer.Response.error(401,"Código inválido, vencido ou destinado a outro vínculo.");
                 return json(new JSONObject().put("token",kind.equals("ha")?prefs.token():phones.issue(Notice.string(d,"name","Celular",60),kind)));
             }
             RequestAuth.Client client=requestAuth.verify(r);
             if(client==null)return LanServer.Response.error(401,"Acesso exclusivo para clientes vinculados. Atualize o app e a integração. No controle, use Menu → Trocar TV para vincular novamente.");
             if(r.method.equals("GET")&&r.path.equals("/api/hello"))return json(info());
-            if(!CameraAccess.allowed(client.role,r.method,r.path,r.method.equals("POST")?new JSONObject(r.body):new JSONObject()))return LanServer.Response.error(403,"Configure e envie avisos de câmera pelo Home Assistant.");
+            JSONObject payload=r.method.equals("POST")?BoundedJson.object(r.body,1600000):new JSONObject();
+            if(!CameraAccess.allowed(client.role,r.method,r.path,payload))return LanServer.Response.error(403,"Configure e envie avisos de câmera pelo Home Assistant.");
             if(r.path.startsWith("/auth/")&&!client.role.equals("control"))return LanServer.Response.error(403,"Esta operação exige o aplicativo de controle vinculado.");
             if(r.method.equals("GET")&&r.path.equals("/auth/state"))return json(new JSONObject().put("registered",accounts.exists()).put("terms_version",AccountManager.TERMS_VERSION));
             if(r.method.equals("POST")&&r.path.startsWith("/auth/")){
-                JSONObject d=new JSONObject(r.body);
+                JSONObject d=payload;
                 switch(r.path){
                     case "/auth/register":
                         if(!AccountManager.TERMS_VERSION.equals(string(d,"terms_version",30)))return LanServer.Response.error(400,"Atualize o aplicativo e leia os termos atuais.");
@@ -58,7 +59,7 @@ public final class ApiController implements LanServer.Handler {
             if(client.role.equals("phone")||session==null&&!admin){
                 if(r.method.equals("POST")&&r.path.equals("/api/notify")&&client.role.equals("phone")){
                     if(!phones.allowNotice(client.id))return LanServer.Response.error(429,"Aguarde antes de enviar mais avisos.");
-                    JSONObject d=new JSONObject(r.body);JSONObject limited=new JSONObject().put("title",Notice.string(d,"title","Celular",160)).put("message",string(d,"message",1200)).put("icon","phone").put("duration",10).put("id","phone-"+string(d,"id",60));
+                    JSONObject d=payload;JSONObject limited=new JSONObject().put("title",Notice.string(d,"title","Celular",160)).put("message",string(d,"message",1200)).put("icon","phone").put("duration",10).put("id","phone-"+string(d,"id",60));
                     Notice n=new Notice(limited,prefs.defaults());return onMain(()->overlay.receive(n));
                 }
                 return LanServer.Response.error(401,"Entre com usuário e senha.");
@@ -74,7 +75,7 @@ public final class ApiController implements LanServer.Handler {
                 case "/media/logo":case "/media/background":byte[] bytes=media.bytes(r.path.substring(7));return bytes==null?LanServer.Response.error(404,"Sem imagem personalizada."):new LanServer.Response(200,"image/png",bytes);
             }
             if(r.method.equals("POST")){
-                JSONObject d=new JSONObject(r.body);
+                JSONObject d=payload;
                 switch(r.path){
                     case "/auth/logout":accounts.forgetClient(client.id);return json(new JSONObject().put("ok",true)).header("Set-Cookie",AccountManager.clearCookie());
                     case "/auth/password":accounts.changePassword(string(d,"current",128),string(d,"password",128));return json(new JSONObject().put("ok",true)).header("Set-Cookie",AccountManager.clearCookie());

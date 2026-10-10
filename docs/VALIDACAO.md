@@ -1,6 +1,14 @@
 # Validação — CasaNotify TV
 
-Última revisão da integração e dos aplicativos: 09/10/2026.
+Última revisão da integração e dos aplicativos: 10/10/2026.
+
+## Aplicativos 2.4.1 / integração 2.2.1 — segurança de rede
+
+- **82 testes Java aprovados:** TLS local real, adulteração/repetição de comandos, revogação e isolamento de credenciais; novos casos de JSON ambíguo/profundo, compressão, conexões lentas e limites por IP.
+- **112 testes Python aprovados:** Home Assistant 2026.9.3/Python 3.14.7, recuperação de IP autenticada, anúncio falso, conflito com reconfiguração, JSON malformado e resposta gzip em aiohttp local real. Ruff aprovado.
+- **Dois fluxos DOM aprovados**, incluindo login persistente, personalização, CSRF, revogação e texto seguro.
+- Três APKs 2.4.1, versionCode 10, assinatura original, API mínima 26/alvo 35, permissões/componentes e sons conferidos; pacote HA 2.2.1. Mesmas identidades, vínculos e 37 entidades.
+- Testes limitados ao código e ao laboratório local. Sem execução em aparelhos físicos, fuzzing contínuo, teste distribuído ou auditoria independente. [Achados, correções e limites](SEGURANCA_2_4_1.md). Registros abaixo são históricos.
 
 ## Aplicativos 2.4.0 / integração 2.2.0 — controle, câmeras e continuidade
 
