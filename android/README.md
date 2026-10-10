@@ -1,6 +1,6 @@
-# Aplicativos Android — CasaNotify 2.3.0
+# Aplicativos Android — CasaNotify 2.4.0
 
-Receptor Android TV em Java e app de controle com interface empacotada em WebView, HTTPS com certificado fixado e conta local por usuário/senha, câmeras RTSP, personalização, notificações do celular e VPN IKEv2 em aparelhos compatíveis.
+Receptor Android TV em Java e app de controle com interface empacotada em WebView, HTTPS com certificado fixado e conta local por usuário/senha, câmeras RTSP comandadas pelo Home Assistant, personalização, notificações do celular e controle nativo Android TV Remote Service. A configuração de VPN está desativada.
 
 ## Compilar
 
@@ -14,7 +14,7 @@ python3 tools/build_apk.py --variant phone --sdk /caminho/Android/Sdk --jdk /cam
 
 `storeFile` é resolvido a partir da pasta do arquivo de propriedades. Sem a assinatura original, o script cria outra chave; o APK resultante não atualiza a instalação anterior. O projeto público não contém chaves privadas.
 
-Não há bibliotecas de terceiros em tempo de execução no APK. O projeto Gradle pode ser aberto no Android Studio; a compilação efetivamente validada nesta entrega foi feita pelo script com ferramentas oficiais do SDK.
+Não há bibliotecas de terceiros em tempo de execução no APK. As referências Apache 2.0 do protocolo do controle estão em `../THIRD_PARTY_NOTICES.md`, com licença e aviso incluídos nos APKs. O projeto Gradle pode ser aberto no Android Studio; a compilação efetivamente validada nesta entrega foi feita pelo script com ferramentas oficiais do SDK.
 
 `tv` é a edição padrão. O manifesto comum declara apenas rede e configurações compartilhadas. Cada edição acrescenta seus componentes em `app/src/tv`, `app/src/control` ou `app/src/phone`. As classes `PhoneActivity`, `PhoneApi` e `PhoneNotificationService` existem somente no source set `phone`; o código do listener não entra nos APKs TV e Controle. `app/src/companion` contém o controle comum às edições Controle/Celular. Gradle oferece as variantes `tvRelease`, `controlRelease` e `phoneRelease`.
 
@@ -36,9 +36,9 @@ A pasta de JARs precisa conter `junit.jar` (JUnit 4.13.2), `hamcrest.jar` (Hamcr
 Confira também os artefatos assinados, incluindo permissões, componentes, ausência das classes de espelhamento na edição TV, versão, alinhamento e certificado de assinatura:
 
 ```sh
-python3 android/tools/verify_apks.py --build-tools /caminho/Android/Sdk/build-tools/35.0.0 --jdk /caminho/jdk17 --tv android/build/CasaNotify-TV-2.3.0.apk --control android/build/CasaNotify-Controle-2.3.0.apk --phone android/build/CasaNotify-Celular-2.3.0.apk --expected-certificate b132bd2e9d9dd5db7e338f0179b16c1a13eefd2e84e34ee93bfac063b57b48fc
+python3 android/tools/verify_apks.py --build-tools /caminho/Android/Sdk/build-tools/35.0.0 --jdk /caminho/jdk17 --tv android/build/CasaNotify-TV-2.4.0.apk --control android/build/CasaNotify-Controle-2.4.0.apk --phone android/build/CasaNotify-Celular-2.4.0.apk --expected-certificate b132bd2e9d9dd5db7e338f0179b16c1a13eefd2e84e34ee93bfac063b57b48fc
 ```
 
 Teste visual opcional: instale os navegadores com `npx playwright install chromium` e execute `npm run test:browser` em ambiente que permita iniciar Chromium. Nesta entrega esse teste foi bloqueado pelo ambiente; veja [o relatório](../docs/VALIDACAO.md).
 
-Leia [instalação](../docs/INSTALACAO.md) e [API](API.md). A API 3 exige HTTPS fixado e prova da chave vinculada por comando. Atualize também a integração HA para 2.1.0; veja as instruções de migração.
+Leia [instalação](../docs/INSTALACAO.md) e [API](API.md). A API 3 exige HTTPS fixado e prova da chave vinculada por comando. Atualize também a integração HA para 2.2.0; veja as instruções de migração.

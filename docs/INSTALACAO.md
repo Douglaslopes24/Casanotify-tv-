@@ -1,115 +1,100 @@
-# Instalar CasaNotify 2.3.0
+# Instalar CasaNotify 2.4.0
 
-## 1. Preparar a TV
+## Atualizar sem perder o vínculo
 
-1. Instale **CasaNotify-TV-2.3.0.apk** no Android TV/TV Box (Android 8+), como atualização sobre a versão anterior, sem apagar dados.
-2. Abra o app, leia e aceite os termos.
-3. Autorize **Sobreposição** nas configurações do Android e volte ao app.
-4. Toque em **Ativar receptor**. Mantenha a TV e o celular na mesma rede. O IP fica disponível para conexão manual quando necessário.
+Instale **CasaNotify-TV-2.4.0.apk** na TV e **CasaNotify-Celular-2.4.0.apk** no telefone, como atualização, sem apagar os dados. Para usar somente o controle, há **CasaNotify-Controle-2.4.0.apk**, sem leitor de notificações. As três edições usam o mesmo identificador e assinatura: uma substitui a outra no mesmo aparelho.
 
-Permissões do sistema, instalação e ativação do receptor exigem ação na própria TV. Depois, faça os ajustes de avisos pelo celular. TVs Samsung Tizen e LG webOS precisam de um dispositivo Android externo.
+Atualize a integração Home Assistant para **2.2.0** e reinicie o HA, mantendo a integração existente. As 37 entidades, seus IDs, a conta, o certificado e os vínculos das versões 2.2/2.3 são preservados. Abra os apps e aceite os termos atualizados. Na TV, deixe o receptor ativo; no celular, confira os ajustes de avisos para ativar o serviço contínuo.
 
-## 2. Primeiro acesso e ajustes pelo celular
+## 1. TV receptora
 
-1. Instale **CasaNotify-Celular-2.3.0.apk** para controle e avisos, ou **CasaNotify-Controle-2.3.0.apk** para controle sem leitura de notificações.
-2. Aguarde a busca automática e toque no nome da TV. Se a rede/VPN bloquear mDNS, toque em **Informar IP manualmente**. Os aparelhos precisam se alcançar pela rede.
-3. Na TV, abra **Perfil → Identificação segura da TV**. Compare todos os grupos SHA-256 com os exibidos no celular. Em **Perfil → Vincular controle / criar conta**, gere o código e digite-o no celular. Ele aprova este controle uma vez e vale dois minutos.
-4. Entre uma vez com o usuário e a senha existentes e deixe **Manter conectado neste celular** marcado. Não há segundo fator. Nas próximas aberturas, o acesso será restaurado automaticamente.
-5. No primeiro cadastro, informe nome, usuário e senha de 12–128 caracteres, leia e aceite os termos.
-6. O app mostra o agradecimento com seu nome e abre os ajustes: **Criar aviso, Aparência, Home Assistant, Câmeras RTSP, Minha marca, Conta e conexões, Atividade**.
+1. Instale a edição **TV**, abra e aceite os termos.
+2. Autorize **Sobreposição** no Android e volte ao CasaNotify.
+3. Toque em **Ativar receptor**. Celular, TV e Home Assistant devem conseguir se comunicar pela rede.
+4. Se desejar, ative **Iniciar após ligar a TV**.
 
-Nenhuma dessas etapas abre Chrome ou outro navegador. O menu superior permite trocar a TV, ler termos, configurar a VPN do celular e consultar o espelhamento opcional. Fotos são escolhidas pelo seletor de imagens do Android. O app não pede acesso geral aos arquivos. A câmera RTSP é reproduzida na TV, não na prévia do controle.
+Permissões e primeira ativação exigem ação na própria TV. Android 8+ é necessário. Samsung Tizen e LG webOS precisam de um aparelho Android externo.
 
-A identificação da TV e a chave de vínculo ficam cifradas no celular. A senha não é salva. Uma autorização cifrada restaura a sessão ao abrir o app; sair da conta, trocar a senha ou revogar o controle exige um novo login. Fechar a tela ou ficar sem rede não apaga o vínculo. Cinco falhas de login bloqueiam tentativas por cinco minutos. Se esquecer a senha, redefina a conta presencialmente na TV; os dados de câmeras e o vínculo do Home Assistant permanecem.
+## 2. Primeiro vínculo e login do celular
 
-### Qual APK instalar
+1. Instale e abra a edição **Celular** ou **Controle**.
+2. Aguarde a busca automática e selecione sua TV. Há **Informar IP manualmente** se mDNS estiver bloqueado.
+3. Compare o SHA-256 mostrado com **Perfil → Identificação segura da TV** na TV.
+4. Gere o código em **Perfil → Vincular controle / criar conta** e digite no celular. Esse vínculo é feito uma vez.
+5. Crie sua conta ou entre com usuário e senha existentes. Deixe **Manter conectado neste celular** marcado para acesso automático; a senha não fica salva. Não há segundo fator ou SMS.
 
-| Edição | Aparelho | Função |
-|---|---|---|
-| TV | TV/TV Box | Receptor dos avisos e servidor local |
-| Controle | Celular | Cadastro, login e todos os ajustes do painel; não lê notificações de outros apps |
-| Celular (opcional) | Celular | Tudo do Controle e espelhamento de notificações escolhidas, mediante autorização do Android |
+Os ajustes ficam no aplicativo: Criar aviso, Aparência, Home Assistant, Minha marca, Conta e conexões e Atividade. A TV não serve painel ao navegador. Fechar a tela ou perder a rede não apaga o vínculo. O IP é recuperado por descoberta autenticada; sair da conta, trocar senha ou revogar o controle exige novo login.
 
-As edições usam o mesmo identificador e a mesma assinatura das versões anteriores: uma substitui a outra no mesmo aparelho. Instale TV na TV e Celular no telefone se quiser espelhamento. Se quiser espelhamento, substitua Controle por Celular no telefone; o vínculo de controle é preservado.
+## 3. Controle remoto Android TV
 
-### Atualização sem perder a conta
+1. Toque em **Remoto**, na barra superior do aplicativo do celular.
+2. Toque em **Vincular controle**. Mantenha TV e celular na mesma rede e o receptor CasaNotify ativo.
+3. Digite os **seis caracteres** que aparecem na tela da Android TV; podem conter letras de A a F.
+4. Use setas, OK, Voltar, Início, volume, Mudo, reprodução e Espera. O controle se reconecta ao reabrir essa tela.
 
-Da versão 2.2.0 para 2.3.0, atualize primeiro a TV e depois o celular, mantendo os dados: usuário, senha, câmeras, imagens e certificado são preservados. A integração Home Assistant permanece em **2.1.0**; atualize-a apenas se ainda usa uma versão anterior. Atualize o app Controle/Celular para **2.3.0**. Clientes antigos não conseguem enviar comandos à API 3.
+Esse é o pareamento do **Android TV Remote Service**, diferente do código CasaNotify e independente do login da conta. É feito uma vez e fica salvo no celular. Não exige ADB, root ou serviço de acessibilidade. Algumas TV Boxes com Android comum não incluem o serviço; o controle não funciona nelas sem suporte do aparelho. A saída de áudio pode limitar o controle de volume.
 
-O vínculo da 2.2.0 é reaproveitado. Entre uma vez com sua senha existente para autorizar o acesso automático. Apenas controles anteriores à 2.2.0 precisam do vínculo inicial. Leia os termos atualizados e mantenha o receptor ativo. Quem já tinha Home Assistant vinculado mantém sua chave e as entidades ao atualizar a integração. Vínculos de espelhamento existentes também podem ser reutilizados pelo aplicativo atualizado. O segredo TOTP antigo continua removido automaticamente; não é necessário autenticador.
-Quem atualiza da 2.0.0 também recebe a correção de HTTPS introduzida na 2.0.1: o certificado da TV muda uma vez. Confira o novo SHA-256 e reconfigure o vínculo existente do Home Assistant e dos celulares. Não exclua a integração nem crie outra TV; isso ajuda a preservar entidades e automações.
+**Esquecer este controle** remove o vínculo local. Para revogá-lo também na TV, use os ajustes da própria Android TV. O vínculo nativo é independente da conta e dos avisos CasaNotify.
 
-## 3. Home Assistant
+## 4. Avisos com o aplicativo fechado
 
-Exige Home Assistant 2026.9 ou posterior. **Não é necessário criar conta no app de controle para vincular a TV ao Home Assistant.** O código correto é o gerado em **Vincular Home Assistant** na TV; a alternativa é a chave exibida em **Ver chave do Home Assistant**.
+Na edição **Celular**:
 
-### Pelo HACS
+1. Faça o primeiro login do controle. Ele também cria a chave limitada dos avisos, sem outro IP ou código.
+2. Abra **Ajustes → Avisos dos aplicativos** e aceite os termos atualizados.
+3. Autorize o acesso às notificações nas configurações do Android e escolha quais aplicativos podem enviar avisos.
+4. Ative o envio e permita a notificação do serviço. Por padrão, o conteúdo das mensagens é ocultado.
+5. No cartão **Avisos com o app fechado**, toque em **Ativar conexão contínua** se o serviço estiver parado. Confira a notificação **CasaNotify · avisos para a TV**.
+6. Feche a tela do CasaNotify ou remova-a dos recentes e envie uma notificação de um aplicativo escolhido. O serviço é independente dessa tela. A notificação permanente tem um botão **Pausar avisos**.
 
-1. HACS → menu → **Repositórios personalizados**.
-2. Adicione `https://github.com/Douglaslopes24/Casanotify-tv-`, categoria **Integração**.
-3. Procure CasaNotify TV, instale e reinicie o Home Assistant.
+No Xiaomi/POCO/HyperOS e em outros fabricantes, use o botão **Bateria e início automático no Android** e ajuste as opções de início automático e bateria permitidas pelo seu aparelho, se necessário. O aplicativo não altera essas escolhas sozinho.
 
-Não é necessário que o projeto esteja no catálogo padrão do HACS para adicioná-lo como repositório personalizado.
+**Forçar parada**, parar o app no gerenciador do Android, revogar a permissão ou certas restrições do fabricante interrompem o envio. Abra novamente o aplicativo para retomá-lo. Não há funcionamento garantido contra essas ações do sistema.
 
-### Pelo ZIP
+A fila cifrada comporta até 30 avisos recentes, com prazo de dez minutos. Ao reconectar o leitor, notificações ainda ativas e posteriores à ativação do envio podem ser recuperadas; confirmações cifradas evitam reenvio de avisos já entregues. Notificações removidas durante uma interrupção não podem ser recuperadas. Veja serviço, pendências e último envio no cartão de diagnóstico. A TV precisa estar ligada, com receptor ativo e acessível pela rede.
 
-1. Extraia **CasaNotify-TV-Integracao-HA-2.1.0.zip**.
-2. Copie a pasta `custom_components/casanotify_tv` para `/config/custom_components/casanotify_tv` do Home Assistant, substituindo a versão antiga.
-3. Confira que existe `/config/custom_components/casanotify_tv/manifest.json` e reinicie o Home Assistant.
+Avisos secretos, permanentes, resumos e conteúdo sensível identificado pelo filtro são omitidos. Se o Android negar acesso, o espelhamento não funciona; o app respeita essa restrição.
 
-### Atualizar uma integração já instalada
+## 5. Home Assistant 2.2.0
 
-No HACS, abra CasaNotify TV e baixe novamente a versão do repositório. Pela instalação manual, substitua a pasta pelo ZIP 2.1.0. Reinicie o Home Assistant e mantenha a integração existente para preservar entidades e automações. O `manifest.json` atualizado deve indicar `"version": "2.1.0"`.
+Requer Home Assistant 2026.9+. No **HACS → Repositórios personalizados**, adicione `https://github.com/Douglaslopes24/Casanotify-tv-`, categoria **Integração**. Baixe CasaNotify TV e reinicie o HA.
 
-Se a atualização do APK pedir nova autenticação, confira o certificado na TV e siga a solicitação do Home Assistant. Não apague a integração nem crie uma segunda TV para resolver a troca de certificado.
+Para instalação manual, extraia **CasaNotify-TV-Integracao-HA-2.2.0.zip**, substitua `/config/custom_components/casanotify_tv` e reinicie. O `manifest.json` deve indicar `"version": "2.2.0"`. Não exclua a integração existente para atualizar.
 
-### Vinculação e atualização da versão 1.x
+No primeiro vínculo:
 
-1. Vá a **Configurações → Dispositivos e serviços**. Configure a TV descoberta ou adicione **CasaNotify TV** manualmente.
-2. No modo manual, use o IPv4 mostrado na TV, sem `https://`, e a porta **8765**. Ela é usada só na descoberta; os comandos irão por HTTPS na **8766**.
-3. Compare o SHA-256 apresentado com o certificado exibido fisicamente na TV. Confirme que são iguais.
-4. Na TV, abra **Vincular Home Assistant** e gere o código de seis números. Digite somente esse código ou, como alternativa, somente a chave do Home Assistant exibida na TV.
-5. A integração cria **37 entidades**. Use o botão **Testar aviso**.
+1. Em **Configurações → Dispositivos e serviços**, configure a TV descoberta ou adicione CasaNotify TV pelo IPv4 e porta **8765**.
+2. Confira o SHA-256 com a identificação exibida fisicamente na TV.
+3. Na TV, gere o código em **Vincular Home Assistant** e digite no HA; a chave em **Ver chave do Home Assistant** é uma alternativa.
+4. Confira as 37 entidades e use **Testar aviso**.
 
-Instalações 1.x pedem reautenticação para aprovar o certificado. A identificação da TV é preservada se os dados do app forem mantidos; isso preserva os IDs das entidades antigas. Automações `rest_command` antigas por HTTP devem ser substituídas pelas ações desta integração. O APK 2.2 também recusa comandos com Bearer sem a prova de vínculo; use a integração atualizada.
+Não é necessário criar conta CasaNotify para vincular o HA. Os comandos usam HTTPS na 8766. Atualizações antigas da 2.0.0 podem pedir nova aprovação do certificado; confirme fisicamente e reconfigure a entrada existente para preservar IDs.
 
-## 4. Notificações do celular
+## 6. Câmeras RTSP pelo Home Assistant
 
-1. Instale **CasaNotify-Celular-2.3.0.apk** no celular Android, somente se a instalação for permitida pelo sistema. Abra o app e aceite os termos.
-2. Faça o primeiro vínculo e login do controle como na seção anterior. A chave limitada de avisos é criada nesse login; não há outro IP ou código. Vínculos antigos de avisos são preservados.
-3. Abra **Ajustes → Avisos dos aplicativos** e confira o cartão **Minha TV**.
-4. Leia a explicação de acesso às notificações pelo botão do app e solicite a autorização do Android. Se o sistema negar a permissão, mantenha o envio desligado; ele não funcionará automaticamente sem esse acesso.
-5. Escolha os aplicativos que podem enviar avisos e ative o envio. Se desejar, ative também **conteúdo das mensagens**.
+1. Configure sua câmera RTSP/ONVIF no **Home Assistant**.
+2. Na automação do evento, escolha **CasaNotify TV: Mostrar câmera na TV**.
+3. Selecione a entidade **Avisos** da TV e a entidade `camera.*` da câmera.
+4. Ajuste mensagem, duração, posição, som e áudio do vídeo. Execute a ação para testar.
 
-O envio usa o serviço de notificações autorizado pelo Android e não depende da tela do app aberta. A fila cifrada guarda até 30 avisos; somente avisos com menos de 10 minutos podem ser reenviados. Veja serviço, pendências e último envio em **Conexão em segundo plano**. **Forçar parada**, restrições de bateria ou a revogação da permissão podem interromper o envio até o app ser reaberto ou a restrição resolvida. O app não desativa proteções do sistema.
+O Home Assistant resolve a fonte RTSP e envia o aviso diretamente à TV; o celular pode estar fechado. A TV reproduz a câmera, sem gravação, proxy novo ou transcodificação. Ela precisa alcançar o endereço da fonte e suportar seu codec; prefira substream H.264. Câmeras que forneçam somente HLS/WebRTC não atendem a essa ação RTSP.
 
-Por padrão, a TV recebe apenas o nome do aplicativo e aviso genérico. Algumas notificações podem ser omitidas por restrições do Android, economia de bateria, mensagens secretas ou palavras sensíveis. A proteção do Android não é contornada. No painel **Conta e conexões**, revogue aparelhos que não devem continuar enviando avisos. O celular e a TV precisam conseguir se comunicar pela rede/VPN.
+O cadastro e o disparo de RTSP foram retirados do aplicativo do celular. Automações antigas com `camera_id` continuam aceitas pelo HA; perfis anteriores são preservados. [Exemplos de ação e automação](EXEMPLOS.md).
 
-## 5. Câmeras, sons, imagem e temas
+## 7. Personalização e VPN
 
-- **Câmeras RTSP:** dê um nome e informe a URL fornecida pela câmera. Use **Testar na TV**. Prefira H.264/substream. A compatibilidade de codec, credenciais e transporte depende do equipamento. Não há gravação. Copie o ID da câmera para automações; a URL protegida não é devolvida pela lista.
-- **Minha marca:** envie PNG, JPEG ou WebP; ajuste recorte, posição, rotação e brilho; salve como logo interno ou fundo. O ícone instalado no launcher continua sendo o original.
-- **Aparência:** escolha tema claro/escuro/sistema, animação inicial, toque padrão e fundo personalizado nos avisos. Salve.
-- **Criar aviso:** selecione uma câmera salva ou imagem. Vídeo e foto são alternativas por aviso. Ative som para ouvir o toque escolhido. São 16 opções: 6 originais e os 10 MP3s recebidos. No Home Assistant, os novos IDs são `sound_01` até `sound_10`.
+**Minha marca** permite editar logo interno e fundo com imagens escolhidas no seletor Android. **Aparência** reúne temas, animação, posições e toques. **Criar aviso** aceita texto e imagem; ative Som para ouvir um dos 16 toques. O ícone instalado no launcher permanece o original.
 
-## 6. VPN
-
-Na TV, abra **VPN e rede privada**. No controle, use **Ajustes → VPN deste celular**. A autorização e o perfil da VPN de cada aparelho são controlados pelo Android nesse aparelho. Para IKEv2 integrado, exige Android 11+ com suporte IPsec. Informe seu próprio servidor, identidade e usuário/senha ou PSK. Autorize a solicitação do Android. Servidores com certificado privado personalizado podem exigir um cliente externo; o formulário integrado usa a confiança do Android.
-
-O botão **Abrir VPNs do Android** permite gerenciar VPNs já instaladas, conforme o fabricante. Não há servidor, assinatura nem túnel gratuito fornecido pelo CasaNotify. Se o mDNS não atravessar a VPN, use a vinculação manual por IP alcançável. A indicação de VPN ativa é a do Android; não testa o destino do seu túnel.
+A configuração de **VPN do CasaNotify está oculta e desativada** nesta versão. VPNs externas do Android não são removidas nem desligadas. O sensor de estado no HA continua existindo para preservar automações; uma VPN externa pode bloquear descoberta/acesso local.
 
 ## Se algo não funcionar
 
-- **“Sem resposta da TV” / `ERR_CONNECTION_CLOSED`:** abra o app Controle 2.3.0, confirme o IP atual mostrado na TV e o receptor ativo. Atualize também TV e integração. O navegador não tem mais painel de configuração; toque em **Reconectar à minha TV**. O endereço é recuperado automaticamente por mDNS sem apagar o vínculo. Se mDNS estiver bloqueado, use **Ajustes → Minha TV e conexão → Informar IP manualmente**: para a mesma TV, a chave e o certificado são reaproveitados. A captura recebida não permite determinar sozinha a causa: pode envolver conectividade, receptor, protocolo ou demora na resposta. O login agora aceita até 60 segundos de resposta para derivar a senha em aparelhos lentos.
-- **VPN ativa e painel inacessível:** confira se a VPN permite acesso à rede local e se celular e TV conseguem alcançar o mesmo endereço. Não exponha as portas no roteador para corrigir esse acesso local.
-- **Google Play Protect / acesso negado:** consulte [a explicação dos avisos e das edições](SEGURANCA_ANDROID.md). Mantenha a proteção ativa. As edições TV e Controle não incluem o leitor de notificações; a edição Celular continua dependendo dessa permissão. Ainda é necessário verificar o comportamento de instalação nos seus aparelhos.
-- Permissão de sobreposição: confirme em Configurações do Android → Aplicativos → Acesso especial.
-- Avisos revogados: use **Autorizar novamente os avisos** na tela de ajustes, após entrar na conta do controle. A revogação nunca é contornada automaticamente.
-- TV não descoberta: confirme receptor ativo, mesma rede e ausência de isolamento de clientes. Tente IP manual.
-- Certificado mudou: confira na TV antes de vincular novamente. Não aprove valores desconhecidos.
-- Login bloqueado: aguarde cinco minutos. Não é necessário código de autenticador. Um código de vínculo vencido deve ser gerado novamente na TV.
-- Câmera não abre: confira URL, acesso à rede, autenticação e perfil H.264 suportado pelo aparelho.
-- VPN não conecta: confira os dados do servidor e a autorização do Android.
-- Alertas silenciosos: verifique pausa, horário silencioso, volume e saída de áudio da TV. Urgência ignora horário silencioso, mas respeita pausa.
+- **TV indisponível:** confira receptor, rede e energia. Use **Ajustes → Minha TV e conexão → Informar IP manualmente** se mDNS estiver bloqueado. Para a mesma identidade e certificado, o vínculo é reaproveitado.
+- **Controle não pareia:** confira Android TV Remote Service na TV, mesma rede e PIN atual. PIN do CasaNotify não funciona no controle nativo.
+- **Avisos param em segundo plano:** confira acesso às notificações, serviço contínuo ativo, aplicativos escolhidos e ajustes de bateria/início automático do fabricante. Forçar parada exige reabrir o app.
+- **Câmera indisponível:** confirme a fonte RTSP da entidade no HA, alcance pela TV, credenciais e codec.
+- **Certificado mudou:** compare na TV antes de aprovar novamente.
+- **Avisos revogados:** entre na conta e use **Autorizar novamente os avisos**. A revogação não é contornada automaticamente.
+- **Play Protect / acesso negado:** veja [Segurança Android](SEGURANCA_ANDROID.md). Mantenha as proteções do sistema; nenhuma edição tem aprovação garantida do Google.
 
-Consulte `docs/VALIDACAO.md`: não houve teste desta versão em seus dispositivos físicos.
+Consulte [a validação](VALIDACAO.md): esta versão ainda precisa de teste nos seus aparelhos físicos.

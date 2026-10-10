@@ -15,7 +15,7 @@ public final class ApiController implements LanServer.Handler {
     public ApiController(Context c,Prefs p,OverlayManager o)throws Exception{
         context=c;prefs=p;overlay=o;accounts=SecretStore.accounts(c);phones=PhoneTokens.get(c);cameras=new CameraStore(c);media=new MediaAssets(c);fingerprint=LocalTls.fingerprint();requestAuth=new RequestAuth(id->id.equals("ha")?new RequestAuth.Key(AuthCrypto.digest(prefs.token()),"ha"):phones.key(id));
     }
-    private JSONObject info()throws Exception{return new JSONObject().put("app","CasaNotify TV").put("version","2.3.0").put("api_version",3).put("control_protocol",2).put("auth_mode","password").put("device_id",prefs.deviceId()).put("device_name",prefs.config().optString("device_name")).put("tls_port",Prefs.SECURE_PORT).put("tls_fingerprint",fingerprint);}
+    private JSONObject info()throws Exception{return new JSONObject().put("app","CasaNotify TV").put("version","2.4.0").put("api_version",3).put("control_protocol",2).put("auth_mode","password").put("device_id",prefs.deviceId()).put("device_name",prefs.config().optString("device_name")).put("tls_port",Prefs.SECURE_PORT).put("tls_fingerprint",fingerprint);}
     private static LanServer.Response json(JSONObject o){return LanServer.Response.json(200,o.toString());}
     private static String string(JSONObject o,String k,int n)throws JSONException{return Notice.string(o,k,"",n);}
     private static String cookieId(String cookie){if(cookie==null)return "";for(String part:cookie.split(";")){String[] p=part.trim().split("=",2);if(p.length==2&&p[0].equals("__Host-casanotify")&&p[1].matches("[A-Za-z0-9_-]{43}"))return p[1];}return "";}
@@ -38,6 +38,7 @@ public final class ApiController implements LanServer.Handler {
             RequestAuth.Client client=requestAuth.verify(r);
             if(client==null)return LanServer.Response.error(401,"Acesso exclusivo para clientes vinculados. Atualize o app e a integração. No controle, use Menu → Trocar TV para vincular novamente.");
             if(r.method.equals("GET")&&r.path.equals("/api/hello"))return json(info());
+            if(!CameraAccess.allowed(client.role,r.method,r.path,r.method.equals("POST")?new JSONObject(r.body):new JSONObject()))return LanServer.Response.error(403,"Configure e envie avisos de câmera pelo Home Assistant.");
             if(r.path.startsWith("/auth/")&&!client.role.equals("control"))return LanServer.Response.error(403,"Esta operação exige o aplicativo de controle vinculado.");
             if(r.method.equals("GET")&&r.path.equals("/auth/state"))return json(new JSONObject().put("registered",accounts.exists()).put("terms_version",AccountManager.TERMS_VERSION));
             if(r.method.equals("POST")&&r.path.startsWith("/auth/")){

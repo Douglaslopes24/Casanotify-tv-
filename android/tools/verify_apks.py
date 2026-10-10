@@ -40,8 +40,8 @@ def main():
         badging = run(tools / 'aapt', 'dump', 'badging', apk)
         manifest = run(tools / 'aapt', 'dump', 'xmltree', apk, 'AndroidManifest.xml')
         permissions = set(re.findall(r"uses-permission: name='([^']+)'", badging))
-        assert permissions == (common | receiver if edition == 'tv' else common | discovery | ({'android.permission.RECEIVE_BOOT_COMPLETED'} if edition == 'phone' else set())), permissions
-        assert "name='br.com.casanotify.tv' versionCode='8' versionName='2.3.0'" in badging
+        assert permissions == (common | receiver if edition == 'tv' else common | discovery | ({'android.permission.RECEIVE_BOOT_COMPLETED', 'android.permission.FOREGROUND_SERVICE', 'android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE', 'android.permission.POST_NOTIFICATIONS', 'android.permission.WAKE_LOCK'} if edition == 'phone' else set())), permissions
+        assert "name='br.com.casanotify.tv' versionCode='9' versionName='2.4.0'" in badging
         assert "sdkVersion:'26'" in badging and "targetSdkVersion:'35'" in badging
         with zipfile.ZipFile(apk) as archive:
             assert archive.testzip() is None
@@ -53,7 +53,7 @@ def main():
                 assert archive.getinfo(name).compress_type == zipfile.ZIP_STORED, 'MediaPlayer needs uncompressed resources'
                 assert hashlib.sha256(archive.read(name)).hexdigest() == sound['sha256'], 'Sound bytes changed'
         if edition in ('tv', 'control'):
-            for component in ('MirrorSender', 'MirrorRetryJob', 'MirrorBootReceiver'):
+            for component in ('MirrorSender', 'MirrorRetryJob', 'MirrorBootReceiver', 'MirrorConnectionService'):
                 assert component not in manifest
                 assert f'Lbr/com/casanotify/tv/{component};'.encode() not in dex
         if edition == 'tv':
@@ -63,19 +63,28 @@ def main():
                 assert f'Lbr/com/casanotify/tv/{component};'.encode() not in dex
             assert b'Landroid/service/notification/NotificationListenerService;' not in dex
             assert 'NotifyService' in manifest and 'MainActivity' in manifest
+            assert 'RemoteActivity' not in manifest
+            assert b'Lbr/com/casanotify/tv/AndroidRemote;' not in dex
         elif edition == 'control':
             assert 'BIND_NOTIFICATION_LISTENER_SERVICE' not in manifest
             assert 'PhoneNotificationService' not in manifest
             assert b'Landroid/service/notification/NotificationListenerService;' not in dex
-            assert 'ControlActivity' in manifest and 'MainActivity' not in manifest
+            assert 'ControlActivity' in manifest and 'RemoteActivity' in manifest and 'MainActivity' not in manifest
             assert 'BootReceiver' not in manifest and '.NotifyService' not in manifest
         else:
-            assert 'ControlActivity' in manifest
+            assert 'ControlActivity' in manifest and 'RemoteActivity' in manifest
+            assert 'MirrorConnectionService' in manifest
             assert 'BIND_NOTIFICATION_LISTENER_SERVICE' in manifest
             assert 'PhoneActivity' in manifest and 'PhoneNotificationService' in manifest
             assert 'MirrorRetryJob' in manifest and 'MirrorBootReceiver' in manifest and 'BIND_JOB_SERVICE' in manifest
             assert 'MainActivity' not in manifest and '"br.com.casanotify.tv.BootReceiver"' not in manifest
             assert '.NotifyService' not in manifest
+            foreground = manifest.split('.MirrorConnectionService', 1)[1].split('E:', 1)[0]
+            assert re.search(r'android:stopWithTask[^\n]*=\(type 0x12\)0x0', foreground)
+            assert re.search(r'android:exported[^\n]*=\(type 0x12\)0x0', foreground)
+            assert re.search(r'android:foregroundServiceType[^\n]*=\(type 0x11\)0x10', foreground)
+        vpn = manifest.split('.VpnActivity', 1)[1].split('E:', 1)[0]
+        assert re.search(r'android:enabled[^\n]*=\(type 0x12\)0x0', vpn)
         signature = run(java, '-jar', tools / 'lib/apksigner.jar', 'verify', '--print-certs', apk)
         certificate = re.search(r'certificate SHA-256 digest: ([0-9a-f]+)', signature).group(1)
         assert certificate == args.expected_certificate.lower(), 'APK signing identity changed'

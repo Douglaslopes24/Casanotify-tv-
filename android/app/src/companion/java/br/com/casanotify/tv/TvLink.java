@@ -35,5 +35,5 @@ public final class TvLink {
         throw new IOException("TV offline. Seu vínculo continua salvo; confira a rede e se o receptor está ativo.");
     }
     public static final class Revoked extends IOException{public Revoked(){super("O acesso foi revogado na TV. Gere um novo vínculo somente se desejar autorizar este celular novamente.");}}
-    public static final class Upgrade extends IOException{public Upgrade(){super("Atualize o receptor da TV para 2.3.0 para usar a conexão automática.");}}
+    public static final class Upgrade extends IOException{public Upgrade(){super("Atualize o receptor da TV para 2.4.0 para usar a conexão automática.");}}
 }

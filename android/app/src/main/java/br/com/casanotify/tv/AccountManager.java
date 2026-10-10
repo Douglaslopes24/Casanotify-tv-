@@ -7,7 +7,7 @@ import org.json.*;
 public final class AccountManager {
     public interface Store { String read() throws Exception; void write(String s) throws Exception; void delete() throws Exception; }
     public interface Clock { long now(); }
-    public static final String TERMS_VERSION="2026-10-08";
+    public static final String TERMS_VERSION="2026-10-09";
     private final Store store; private final Clock clock;
     private int failures; private long blockedUntil;
     private final Map<String,Session> sessions=new LinkedHashMap<>();

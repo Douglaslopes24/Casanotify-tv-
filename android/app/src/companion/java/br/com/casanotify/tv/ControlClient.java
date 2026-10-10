@@ -10,8 +10,8 @@ import org.json.*;
 /** A single selected receiver; session cookies never enter WebView or persistent storage. */
 public final class ControlClient {
     private static final int LIMIT=2*1024*1024;
-    private static final Set<String> READ=new HashSet<>(Arrays.asList("/api/hello","/auth/state","/auth/session","/api/config","/api/status","/api/history","/api/cameras","/api/phones","/media/logo","/media/background"));
-    private static final Set<String> WRITE=new HashSet<>(Arrays.asList("/api/phones/link","/auth/resume","/auth/register","/auth/login","/auth/logout","/auth/profile","/auth/password","/api/config","/api/notify","/api/clear","/api/media","/api/media/remove","/api/cameras/save","/api/cameras/delete","/api/cameras/test","/api/phones/revoke"));
+    private static final Set<String> READ=new HashSet<>(Arrays.asList("/api/hello","/auth/state","/auth/session","/api/config","/api/status","/api/history","/api/phones","/media/logo","/media/background"));
+    private static final Set<String> WRITE=new HashSet<>(Arrays.asList("/api/phones/link","/auth/resume","/auth/register","/auth/login","/auth/logout","/auth/profile","/auth/password","/api/config","/api/notify","/api/clear","/api/media","/api/media/remove","/api/phones/revoke"));
     interface ConnectionFactory { HttpURLConnection open(URL url)throws Exception; }
     private final String host,token;private final SSLSocketFactory tls;private final ConnectionFactory factory;
     private String cookie="";
@@ -33,7 +33,7 @@ public final class ControlClient {
     public static JSONObject discover(String input)throws Exception{
         String host=ipv4(input);HttpURLConnection c=(HttpURLConnection)new URL("http://"+host+":8765/api/info").openConnection();c.setConnectTimeout(5000);c.setReadTimeout(5000);c.setInstanceFollowRedirects(false);c.setUseCaches(false);
         try{if(c.getResponseCode()!=200)throw new IOException("Ative o receptor na TV e confira o IP.");JSONObject info=new JSONObject(new String(read(c.getInputStream(),65536),StandardCharsets.UTF_8));
-            if(!"CasaNotify TV".equals(info.optString("app"))||info.optInt("api_version")!=3||info.optInt("control_protocol")!=2||!info.optString("tls_fingerprint").matches("[0-9a-f]{64}"))throw new IOException("Atualize o aplicativo da TV para a versão 2.3.0 ou posterior.");
+            if(!"CasaNotify TV".equals(info.optString("app"))||info.optInt("api_version")!=3||info.optInt("control_protocol")!=2||!info.optString("tls_fingerprint").matches("[0-9a-f]{64}"))throw new IOException("Atualize o aplicativo da TV para a versão 2.4.0 ou posterior.");
             return new JSONObject().put("host",host).put("device_name",info.optString("device_name","Minha TV")).put("device_id",info.getString("device_id")).put("tls_fingerprint",info.getString("tls_fingerprint"));
         }finally{c.disconnect();}
     }

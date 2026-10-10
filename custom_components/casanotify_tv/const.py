@@ -3,7 +3,7 @@
 from homeassistant.const import Platform
 
 DOMAIN = "casanotify_tv"
-INTEGRATION_VERSION = "2.1.0"
+INTEGRATION_VERSION = "2.2.0"
 PORT = 8765
 PLATFORMS = [
     Platform.BINARY_SENSOR,

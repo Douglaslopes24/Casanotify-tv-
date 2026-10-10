@@ -1,6 +1,9 @@
 {
   "domain": "casanotify_tv",
   "name": "CasaNotify TV",
+  "after_dependencies": [
+    "camera"
+  ],
   "codeowners": [
     "@Douglaslopes24"
   ],
@@ -13,7 +16,7 @@
   "iot_class": "local_polling",
   "issue_tracker": "https://github.com/Douglaslopes24/Casanotify-tv-/issues",
   "requirements": [],
-  "version": "2.1.0",
+  "version": "2.2.0",
   "zeroconf": [
     {
       "type": "_casanotify._tcp.local."

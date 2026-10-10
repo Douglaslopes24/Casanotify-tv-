@@ -16,22 +16,48 @@ data:
   urgent: true
 ```
 
-Câmera cadastrada no painel (copie o ID em **Câmeras RTSP**):
+Câmera configurada no Home Assistant (integração CasaNotify 2.2.0):
 
 ```yaml
-action: casanotify_tv.send_notification
+action: casanotify_tv.send_camera_notification
 target:
   entity_id: notify.tv_da_sala_avisos
 data:
-  title: "Entrada"
-  message: "Movimento detectado"
-  icon: camera
-  camera_id: "COLE_O_ID_DA_CAMERA"
+  camera_entity_id: camera.entrada
+  title: Entrada
+  message: Movimento detectado
   video_muted: true
   duration: 30
+  sound: true
+  tone: doorbell
 ```
 
-Também é aceito `video_url: "rtsp://IP_DA_CAMERA:554/stream"`. Prefira câmera salva quando houver senha, para não deixá-la no YAML. Para foto, use `image_url: "http://IP_DA_CAMERA/imagem.jpg"` e opcional `image_refresh: 5`, sem vídeo no mesmo aviso. URLs de fotos não aceitam credenciais embutidas.
+A entidade deve fornecer uma fonte RTSP que a TV consiga alcançar. A configuração da câmera e seu evento ficam no Home Assistant; o celular pode estar fechado. Exemplo de automação, ajustando os três IDs à sua instalação:
+
+```yaml
+alias: Entrada na TV
+triggers:
+  - trigger: state
+    entity_id: binary_sensor.movimento_entrada
+    to: "on"
+actions:
+  - action: casanotify_tv.send_camera_notification
+    target:
+      entity_id: notify.tv_da_sala_avisos
+    data:
+      camera_entity_id: camera.entrada
+      title: Entrada
+      message: Movimento detectado
+      id: movimento_entrada
+      duration: 30
+      replace: true
+      video_muted: true
+mode: single
+```
+
+A ação resolve a fonte no HA; não copie usuário/senha para o YAML da automação. O protocolo RTSP da câmera pode trafegar sem criptografia e a TV deve suportar seu codec, preferencialmente H.264. Não há gravação ou transcodificação nova.
+
+Automações antigas `send_notification` com `camera_id` continuam aceitas pelo vínculo do HA. Também é aceito `video_url` nessa ação, mas o uso da entidade evita repetir credenciais. Para foto, use `image_url: "http://IP_DA_CAMERA/imagem.jpg"` e opcional `image_refresh: 5`, sem vídeo no mesmo aviso. URLs de fotos não aceitam credenciais embutidas.
 
 Para fundo personalizado já enviado pelo painel, use `backdrop: custom`. Toques: `soft`, `doorbell`, `chime`, `pulse`, `alarm`, `digital` e `sound_01` até `sound_10`. Ícones: `home`, `bell`, `door`, `camera`, `light`, `check`, `warning`, `info`, `sensor`, `motion`, `temperature`, `humidity`, `phone`, `delivery`, `chat`, `battery`, `wifi`, `lock`, `smoke`, `water`, `alarm`.
 

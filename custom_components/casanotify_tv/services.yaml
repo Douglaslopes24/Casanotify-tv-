@@ -188,8 +188,7 @@ send_notification:
         boolean: {}
     video_url:
       name: Vídeo RTSP
-      description: Endereço RTSP acessível pela TV. Escolha vídeo, câmera salva ou
-        imagem. Prefira câmera salva para evitar senhas na automação.
+      description: Endereço RTSP acessível pela TV. Para usar uma entidade de câmera sem copiar credenciais, prefira a ação Mostrar câmera na TV.
       selector:
         text: {}
     video_muted:
@@ -198,7 +197,7 @@ send_notification:
         boolean: {}
     camera_id:
       name: ID da câmera salva
-      description: Copie o ID em Câmeras RTSP no painel.
+      description: Compatibilidade com câmeras salvas em versões antigas. Para novos avisos, use Mostrar câmera na TV com a entidade do Home Assistant.
       selector:
         text: {}
     tone:
@@ -241,3 +240,94 @@ clear_notification:
       name: Identificador (opcional)
       selector:
         text: {}
+
+send_camera_notification:
+  name: Mostrar câmera na TV
+  description: O Home Assistant resolve a câmera RTSP e envia o aviso à TV. Não depende do aplicativo do celular aberto. A câmera precisa fornecer RTSP acessível pela TV.
+  target:
+    entity:
+      domain: notify
+      integration: casanotify_tv
+  fields:
+    camera_entity_id:
+      name: Câmera do Home Assistant
+      required: true
+      selector:
+        entity:
+          domain: camera
+    title:
+      name: Título
+      default: Câmera de segurança
+      selector:
+        text: {}
+    message:
+      name: Mensagem
+      default: Veja o que está acontecendo.
+      selector:
+        text: {}
+    duration:
+      name: Duração
+      default: 30
+      selector:
+        number:
+          min: 3
+          max: 120
+          unit_of_measurement: s
+          mode: box
+    video_muted:
+      name: Vídeo sem áudio
+      default: true
+      selector:
+        boolean: {}
+    id:
+      name: Identificador do aviso
+      selector:
+        text: {}
+    position:
+      name: Posição
+      selector:
+        select:
+          options:
+          - top_left
+          - top_center
+          - top_right
+          - center_left
+          - center
+          - center_right
+          - bottom_left
+          - bottom_center
+          - bottom_right
+    sound:
+      name: Tocar alerta
+      selector:
+        boolean: {}
+    tone:
+      name: Toque do alerta
+      selector:
+        select:
+          options:
+          - soft
+          - doorbell
+          - chime
+          - pulse
+          - alarm
+          - digital
+          - sound_01
+          - sound_02
+          - sound_03
+          - sound_04
+          - sound_05
+          - sound_06
+          - sound_07
+          - sound_08
+          - sound_09
+          - sound_10
+    urgent:
+      name: Urgente
+      selector:
+        boolean: {}
+    replace:
+      name: Substituir aviso atual
+      default: true
+      selector:
+        boolean: {}

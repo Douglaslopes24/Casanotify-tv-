@@ -3,7 +3,7 @@ android {
  namespace 'br.com.casanotify.tv'
  compileSdk 35
  buildToolsVersion '35.0.0'
- defaultConfig { applicationId 'br.com.casanotify.tv'; minSdk 26; targetSdk 35; versionCode 8; versionName '2.3.0' }
+ defaultConfig { applicationId 'br.com.casanotify.tv'; minSdk 26; targetSdk 35; versionCode 9; versionName '2.4.0' }
  flavorDimensions 'device'
  productFlavors {
   tv { dimension 'device' }

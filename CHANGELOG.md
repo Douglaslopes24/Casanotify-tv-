@@ -1,5 +1,14 @@
 # Histórico
 
+## Aplicativos 2.4.0 e integração 2.2.0 — 09/10/2026
+
+- Controle nativo Android TV Remote v2: D-pad, OK, voltar, início, volume, mudo, reprodução e espera; PIN inicial, chave privada no Keystore e certificado aprovado fixado.
+- Espelhamento com foreground service connectedDevice, notificação/pausa, recuperação após interrupção e registros cifrados de entrega. Trava de CPU limitada à entrega, sem atividade constante em repouso.
+- Câmeras configuradas e acionadas pelo Home Assistant; ação por entidade camera, verificação de permissão e fonte RTSP. Operações de câmera bloqueadas para chaves do celular.
+- VPN oculta e Activity desativada, sem alterar a VPN externa do Android.
+- Conta, identidade, chaves e 37 entidades preservadas. APK versionCode 9, assinatura original, API 3/control_protocol 2. Termos atualizados.
+- Ver testes, limites e roteiro de validação física em docs/SEGURANCA_2_4.md.
+
 ## Aplicativos 2.3.0 — 08/10/2026
 
 - Descoberta automática da TV, recuperação autenticada do IP e preservação do primeiro vínculo.

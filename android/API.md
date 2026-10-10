@@ -1,4 +1,4 @@
-# API local 3 · Aplicativos 2.3.0 · Integração HA 2.1.0
+# API local 3 · Aplicativos 2.4.0 · Integração HA 2.2.0
 
 Base protegida: `https://IP_DA_TV:8766`. Host IPv4 e porta obrigatórios. JSON UTF-8, `Content-Type: application/json`, `Content-Length`. Sem CORS ou redirecionamento de credenciais. TLS 1.2/1.3 com certificado da TV fixado pelo cliente após comparação física do SHA-256. Não use `verify_ssl: false`.
 
@@ -51,12 +51,12 @@ Implementações: `RequestAuth.java`, `ControlClient.java` e `custom_components/
 | POST `/api/phones/link` | Controle com sessão/CSRF cria uma chave limitada de avisos associada ao seu `client_id`; substitui a anterior desse controle |
 | GET `/api/status` | Identidade, sobreposição, pausa, silêncio, fila e VPN |
 | GET/POST `/api/config` | Nome, padrões, rotina, tema do app e animação inicial |
-| POST `/api/notify` | Aviso; `camera_id`, `video_url` RTSP ou `image_url` |
+| POST `/api/notify` | Aviso; `camera_id` e `video_url` exigem papel `ha`; `image_url` continua permitido ao controle |
 | POST `/api/clear` | Limpar por ID ou tudo |
 | GET `/api/history` | Até 30 registros temporários |
-| GET `/api/cameras` | IDs e nomes, sem URLs ou credenciais |
-| POST `/api/cameras/save` | ID opcional, nome e URL RTSP; limite 12 |
-| POST `/api/cameras/delete`, `/api/cameras/test` | ID da câmera |
+| GET `/api/cameras` | Somente HA; IDs e nomes legados, sem URLs ou credenciais |
+| POST `/api/cameras/save` | Somente HA; compatibilidade legada, limite 12 |
+| POST `/api/cameras/delete`, `/api/cameras/test` | Somente HA; ID legado |
 | GET `/api/phones` | Controles/espelhamento, sem tokens/hashes |
 | POST `/api/phones/revoke` | ID; vazio revoga todos os controles/espelhamento |
 | POST `/api/media` | `kind`: logo/background, `data`: base64, até 1 MiB decodificado |
@@ -74,8 +74,20 @@ Interface empacotada na origem `https://app.casanotify.local`, sem navegação e
 A API 3 exige atualizar TV, Controle/Celular e integração HA. A chave HA, os vínculos antigos de espelhamento e os IDs da TV são preservados. O controle anterior não tinha chave própria: exige um novo vínculo inicial na TV. A descoberta mDNS continua `_casanotify._tcp.local.` na porta 8765. Não exponha as portas diretamente à Internet.
 
 
-## Descoberta e entrega em segundo plano (2.3)
+## Descoberta e entrega em segundo plano (2.4)
 
 O receptor anuncia `_casanotify._tcp.` com `id`, `name`, `version` e `api`. Os companheiros fazem busca NSD limitada a seis segundos, até 16 serviços e oito resultados IPv4; não varrem sub-redes. Anúncios são apenas candidatos. Ao recuperar o IP, o cliente mantém UUID, certificado e chave originais e exige resposta autenticada de `/api/hello` antes de salvar o novo endereço. Uma mudança no certificado exige nova aprovação física.
 
-O listener da edição Celular é gerenciado pelo Android. `requestRebind` é usado somente com permissão e envio autorizados; boot e atualização do pacote solicitam retomada. `JobScheduler` com rede disponível e retentativa exponencial de 30 segundos cuida da fila, sem foreground service no celular. Uma callback de rede aciona nova tentativa enquanto o listener estiver ativo. A fila AES-GCM contém até 30 avisos, com prazo de dez minutos para entrega; a exclusão dos expirados ocorre quando o processo executar novamente. Os itens ficam vinculados ao UUID, certificado e chave da TV; trocar de destino ou chave descarta os antigos. Permissão, seleção de aplicativos e preferência de conteúdo são conferidas novamente antes do envio. Desligar envio/conteúdo ou remover vínculo limpa a fila. Restrições do sistema podem adiar ou suspender captura e entrega.
+O listener da edição Celular é gerenciado pelo Android. `requestRebind` é usado somente com permissão e envio autorizados; boot e atualização do pacote solicitam retomada. `MirrorConnectionService` é um foreground service `connectedDevice`, iniciado a partir da tela visível ou dos eventos permitidos de boot/atualização. Requer envio e acesso às notificações autorizados; mostra notificação com ação Pausar, usa START_STICKY e não para ao remover a tarefa dos recentes. A cada 30 segundos solicita retomada do listener e envio da fila. `JobScheduler`, com rede disponível e retentativa exponencial, complementa as tentativas. Uma trava de CPU limitada a 90 segundos cobre apenas o escoamento de avisos pendentes. Não é criada em repouso. Uma callback de rede aciona nova tentativa enquanto o listener estiver ativo. A fila AES-GCM contém até 30 avisos, com prazo de dez minutos para entrega; a exclusão dos expirados ocorre quando o processo executar novamente. Os itens ficam vinculados ao UUID, certificado e chave da TV; trocar de destino ou chave descarta os antigos. Permissão, seleção de aplicativos e preferência de conteúdo são conferidas novamente antes do envio. Desligar envio/conteúdo ou remover vínculo limpa a fila. Restrições do sistema podem adiar ou suspender captura e entrega.
+
+Quando o listener reconecta, até 200 notificações ainda ativas são examinadas. Só são capturadas as posteriores à ativação do envio e com menos de dez minutos, respeitando os mesmos filtros. Até 512 identificadores de entrega, vinculados à TV/chave, ficam cifrados por dez minutos; não contêm título ou texto. Evitam repetir entregas confirmadas após reinício. Perda da confirmação ainda pode causar repetição. Forçar parada ou parada pelo gerenciador do Android não é contornada.
+
+## Câmeras comandadas pelo HA
+
+`casanotify_tv.send_camera_notification` recebe `camera_entity_id`, título/mensagem opcionais, duração, áudio, som/toque, posição, urgência, substituição e ID do aviso. O HA verifica permissão de leitura da câmera no contexto do usuário, resolve `async_get_stream_source` com prazo de 15 segundos, exige RTSP e envia pelo cliente autenticado. O endereço não é colocado no estado da entidade nem em mensagens de erro. A fonte continua sendo acessada diretamente pela TV; não há transcodificação ou proxy novo. Câmera e codec devem ser acessíveis/suportados pela TV. O restante da integração carrega mesmo sem o domínio camera instalado.
+
+## Controle nativo da Android TV
+
+É independente da API CasaNotify: Polo em TLS/mTLS na porta 6467 para parear; Remote v2 na 6466 para comandos, com a chave privada RSA 2048 do cliente no Android Keystore. O PIN hexadecimal exibido pela TV comprova o vínculo dos certificados; somente após confirmação do servidor o certificado é salvo cifrado. Conexões de comandos sempre exigem esse certificado. Uma mudança exige novo pareamento explícito; falhas nunca provocam aceitação automática de certificado.
+
+Quadros protobuf limitados a 64 KiB e lista restrita de teclas. Ping e negociação não dependem da WebView. A conexão termina ao sair da tela Remoto e se refaz automaticamente ao voltar. Comandos não são reenviados após falhas. O serviço exige Android TV Remote Service; não usa ADB, acessibilidade, root ou injeção privilegiada. Esquecer remove a confiança local; revogação na TV é feita nas configurações da própria Android TV. Fontes/licenças em `../THIRD_PARTY_NOTICES.md`.

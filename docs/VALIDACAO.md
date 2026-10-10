@@ -1,6 +1,15 @@
 # Validação — CasaNotify TV
 
-Última revisão da integração e dos aplicativos: 08/10/2026.
+Última revisão da integração e dos aplicativos: 09/10/2026.
+
+## Aplicativos 2.4.0 / integração 2.2.0 — controle, câmeras e continuidade
+
+- **71 testes Java aprovados**, incluindo protocolo do controle remoto, quadros malformados, PIN, recibos persistentes e política de acesso às câmeras, além da suíte anterior de autenticação/TLS local.
+- **82 testes Python aprovados** com Home Assistant 2026.9.3/Python 3.14.7; nova ação de câmera por entidade, erros sem credenciais e permissão de leitura. Ruff aprovado.
+- **Dois fluxos DOM aprovados**, incluindo ausência de configuração RTSP e VPN no painel do celular.
+- Três APKs 2.4.0, versionCode 9, API mínima 26/alvo 35; assinatura original, alinhamento, integridade, permissões e dez MP3s conferidos. Serviço foreground apenas em Celular; VPN desativada em todas as edições.
+- Sem execução desta versão em TV/celular físicos ou emulador. Controle nativo, aparência/foco Android, mDNS, restrições de bateria e reprodução RTSP ainda precisam da verificação nos aparelhos. Não há promessa de aprovação do Play Protect.
+- [Escopo, proteção e roteiro nos aparelhos](SEGURANCA_2_4.md). Registros abaixo são históricos.
 
 ## Aplicativos 2.3.0 / integração 2.1.0 — conexão e segundo plano
 
