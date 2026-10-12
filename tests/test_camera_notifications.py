@@ -56,6 +56,30 @@ async def test_camera_custom_alert_settings_reach_receiver(hass, entry, tv):
     assert data["urgent"] is True
 
 
+@pytest.mark.parametrize("decoder", ["auto", "hardware", "software"])
+async def test_video_options_reach_receiver(hass, entry, tv, decoder):
+    with patch(LOOKUP, new=AsyncMock(return_value=SOURCE)):
+        await send_camera(hass, video_decoder=decoder, video_transport="tcp", video_buffer_ms=1200)
+    data = tv["commands"][-1][1]
+    assert data["video_decoder"] == decoder
+    assert data["video_transport"] == "tcp"
+    assert data["video_buffer_ms"] == 1200
+
+
+@pytest.mark.parametrize("options", [
+    {"video_decoder": "ffmpeg"}, {"video_decoder": None},
+    {"video_transport": "http"}, {"video_transport": True},
+    {"video_buffer_ms": 249}, {"video_buffer_ms": 3001},
+    {"video_buffer_ms": True}, {"video_buffer_ms": "800ms"}, {"video_buffer_ms": 500.5},
+])
+async def test_bad_video_options_do_not_resolve_or_send(hass, entry, tv, options):
+    with patch(LOOKUP, new=AsyncMock(return_value=SOURCE)) as source:
+        with pytest.raises(vol.Invalid):
+            await send_camera(hass, **options)
+    source.assert_not_awaited()
+    assert tv["commands"] == []
+
+
 @pytest.mark.parametrize("source", [None, "", "https://camera.test/live", "rtsp://", SOURCE + "\r\n"])
 async def test_unusable_camera_source_sends_nothing(hass, entry, tv, source):
     with patch(LOOKUP, new=AsyncMock(return_value=source)):

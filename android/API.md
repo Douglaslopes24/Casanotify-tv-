@@ -1,4 +1,4 @@
-# API local 3 · Aplicativos 2.4.1 · Integração HA 2.2.1
+# API local 3 · Aplicativos 2.5.0 · Integração HA 2.3.0
 
 Base protegida: `https://IP_DA_TV:8766`. Host IPv4 e porta obrigatórios. JSON UTF-8, `Content-Type: application/json`, `Content-Length`. Sem CORS ou redirecionamento de credenciais. TLS 1.2/1.3 com certificado da TV fixado pelo cliente após comparação física do SHA-256. Não use `verify_ssl: false`.
 
@@ -39,7 +39,7 @@ Implementações: `RequestAuth.java`, `ControlClient.java` e `custom_components/
 - **Controle:** exige chave de vínculo para `/auth/state`, `/auth/register` e `/auth/login`. Cadastro recebe usuário, nome, senha, aceite e versão dos termos. Login recebe usuário, senha e `remember` booleano opcional (padrão falso). Não há TOTP nem SMS.
 - Com `remember: true`, cadastro/login também retorna `resume_token`, que o transporte nativo remove antes de entregar a resposta à WebView e guarda cifrado. O servidor guarda apenas seu hash, vinculado ao `client_id`. `POST /auth/resume` recebe esse token e exige a prova HMAC do mesmo controle; emite uma nova sessão/CSRF. A autorização dura até sair da conta, trocar senha, revogar o controle ou redefinir a conta. O cadastro/login retorna perfil, CSRF e cookie `__Host-casanotify` Secure/HttpOnly/SameSite=Strict. A sessão fica vinculada ao cliente que entrou. POSTs autenticados por sessão exigem `X-CasaNotify-CSRF`, incluído na prova HMAC. Expiração: 30 minutos de inatividade e 12 horas absolutas.
 - `/auth/session` restaura perfil/CSRF; `/auth/logout` encerra as sessões e a autorização persistente daquele controle; `/auth/password` exige `current` e `password`; `/auth/profile` altera `display_name`. Somente um controle com sessão do proprietário acessa esses ajustes.
-- **Home Assistant:** chave de administração separada, sem precisar cadastrar conta de controle. Tem acesso à API, mas não aos endpoints `/auth/`.
+- **Home Assistant:** chave de administração separada, sem precisar cadastrar conta de controle. Tem acesso administrativo à API, exceto aos endpoints `/auth/` e `/api/remote/`.
 - **Espelhamento:** `GET /api/hello` para conferir a identidade e `POST /api/notify`, limitado a título/mensagem/ID, até 30 avisos/minuto por vínculo (HTTP 429 ao atingir o limite; não revoga a chave). Não acessa configurações, imagens privadas, câmeras, perfil ou histórico.
 - Revogar um vínculo bloqueia novos comandos imediatamente. Redefinir a conta presencialmente revoga os controles, revogando também os avisos associados a esses controles; vínculos legados independentes de espelhamento, Home Assistant e câmeras são mantidos.
 
@@ -54,9 +54,15 @@ Implementações: `RequestAuth.java`, `ControlClient.java` e `custom_components/
 | POST `/api/notify` | Aviso; `camera_id` e `video_url` exigem papel `ha`; `image_url` continua permitido ao controle |
 | POST `/api/clear` | Limpar por ID ou tudo |
 | GET `/api/history` | Até 30 registros temporários |
-| GET `/api/cameras` | Somente HA; IDs e nomes legados, sem URLs ou credenciais |
-| POST `/api/cameras/save` | Somente HA; compatibilidade legada, limite 12 |
-| POST `/api/cameras/delete`, `/api/cameras/test` | Somente HA; ID legado |
+| GET `/api/cameras` | HA ou controle com sessão; IDs e nomes, sem URLs ou credenciais |
+| POST `/api/cameras/save` | HA ou controle com sessão; `id`, `name`, `url` RTSP; limite 12 |
+| POST `/api/cameras/delete` | HA ou controle com sessão; remove por `id` e fecha a janela dessa câmera |
+| POST `/api/cameras/test` | HA; teste legado na fila de avisos; não exposto na ponte do celular |
+| GET `/api/cameras/status` | HA ou controle com sessão; `active`, `camera_id`; nunca a URL |
+| POST `/api/cameras/show` | HA ou controle com sessão; `id`, `video_decoder`, `video_transport`, `video_buffer_ms`, `video_muted` |
+| POST `/api/cameras/release` | HA ou controle com sessão; objeto vazio; fecha somente a janela de câmera |
+| GET `/api/remote/status` | Somente controle com sessão; `available` |
+| POST `/api/remote/command` | Somente controle com sessão; `command`, lista limitada abaixo |
 | GET `/api/phones` | Controles/espelhamento, sem tokens/hashes |
 | POST `/api/phones/revoke` | ID; vazio revoga todos os controles/espelhamento |
 | POST `/api/media` | `kind`: logo/background, `data`: base64, até 1 MiB decodificado |
@@ -90,8 +96,38 @@ Quando o listener reconecta, até 200 notificações ainda ativas são examinada
 
 `casanotify_tv.send_camera_notification` recebe `camera_entity_id`, título/mensagem opcionais, duração, áudio, som/toque, posição, urgência, substituição e ID do aviso. O HA verifica permissão de leitura da câmera no contexto do usuário, resolve `async_get_stream_source` com prazo de 15 segundos, exige RTSP e envia pelo cliente autenticado. O endereço não é colocado no estado da entidade nem em mensagens de erro. A fonte continua sendo acessada diretamente pela TV; não há transcodificação ou proxy novo. Câmera e codec devem ser acessíveis/suportados pela TV. O restante da integração carrega mesmo sem o domínio camera instalado.
 
-## Controle nativo da Android TV
+## Controle remoto pelo vínculo CasaNotify (2.5)
 
-É independente da API CasaNotify: Polo em TLS/mTLS na porta 6467 para parear; Remote v2 na 6466 para comandos, com a chave privada RSA 2048 do cliente no Android Keystore. O PIN hexadecimal exibido pela TV comprova o vínculo dos certificados; somente após confirmação do servidor o certificado é salvo cifrado. Conexões de comandos sempre exigem esse certificado. Uma mudança exige novo pareamento explícito; falhas nunca provocam aceitação automática de certificado.
+`/api/remote/command` aceita somente `command`, com um dos valores `up`, `down`,
+`left`, `right`, `ok`, `back`, `home`, `volume_up`, `volume_down`, `mute` ou
+`play_pause`. Outros campos, comandos e keycodes livres são recusados. Exige
+HTTPS fixado, prova HMAC de controle, sessão vinculada e CSRF. Chaves HA e
+espelhamento não autorizam esses comandos. Há limite global de 16 comandos
+por janela de dois segundos, 429 em excesso e 409 se o serviço estiver ausente
+ou a tela não aceitar a ação. Os comandos não são repetidos após falhas.
 
-Quadros protobuf limitados a 64 KiB e lista restrita de teclas. Ping e negociação não dependem da WebView. A conexão termina ao sair da tela Remoto e se refaz automaticamente ao voltar. Comandos não são reenviados após falhas. O serviço exige Android TV Remote Service; não usa ADB, acessibilidade, root ou injeção privilegiada. Esquecer remove a confiança local; revogação na TV é feita nas configurações da própria Android TV. Fontes/licenças em `../THIRD_PARTY_NOTICES.md`.
+A execução depende do serviço local `CasaRemoteService`, exclusivo da edição
+TV, protegido por `BIND_ACCESSIBILITY_SERVICE` e autorizado pelo proprietário
+nas configurações do Android. Ele consulta foco/ações da janela ativa; não
+processa eventos, extrai textos, captura telas nem executa gestos. Não exige
+ADB, root, porta 6466/6467 ou outro PIN. O protocolo antigo permanece em classes
+não utilizadas pela tela atual, sem abrir conexão ao entrar no controle.
+
+## Reprodução e janela manual RTSP (2.5)
+
+As opções de vídeo são `video_decoder` (`auto` padrão, `hardware`, `software`),
+`video_transport` (`tcp` padrão, `auto`) e `video_buffer_ms` (250–3000, padrão
+800). Os dois serviços de notificação do HA 2.3.0 aceitam essas opções. A
+janela manual usa rotas de câmera independentes, com uma única instância;
+abrir outra câmera fecha a anterior. Liberar não altera fila, pausa ou
+histórico dos avisos. `/api/clear` não fecha a janela manual. Nenhuma dessas
+rotas é acessível pela chave limitada `phone`.
+
+Media3 1.11.1 fornece leitores RTP H.264/H.265/H.263/MPEG-4 Visual/VP8/VP9.
+Os MediaCodecs disponíveis e os perfis da câmera determinam a reprodução.
+Automático permite uma única tentativa por software após erro de renderização
+de vídeo; não há transcodificação, download de codecs ou fallback TLS inseguro.
+O prazo inicial de imagem é 12 segundos por tentativa, com timeout RTSP de
+seis segundos. Falhas exibem mensagem genérica sem a URL. Fechar/liberar
+cancela o player e seus callbacks. O vídeo manual permanece até Liberar,
+Voltar na janela ou encerramento do receptor.

@@ -2,50 +2,40 @@
 
 Notificações personalizadas sobre a tela do Android TV, com integração própria para o Home Assistant e envio opcional de notificações do celular.
 
-**Aplicativos 2.4.1 · Integração 2.2.1 · Android 8+ · Home Assistant 2026.9+ · 37 entidades por TV**
+**Aplicativos 2.5.0 · Integração 2.3.0 · Android 8+ · Home Assistant 2026.9+ · 37 entidades por TV**
 
 ## Downloads
 
-- [CasaNotify TV 2.4.1 — instalar na TV/receptor](downloads/CasaNotify-TV-2.4.1.apk)
-- [CasaNotify Controle 2.4.1 — cadastro, login e ajustes no celular](downloads/CasaNotify-Controle-2.4.1.apk)
-- [CasaNotify Celular 2.4.1 — controle com espelhamento opcional](downloads/CasaNotify-Celular-2.4.1.apk)
-- [Integração Home Assistant 2.2.1](downloads/CasaNotify-TV-Integracao-HA-2.2.1.zip)
+- [CasaNotify TV 2.5.0 — instalar na TV/receptor](downloads/CasaNotify-TV-2.5.0.apk)
+- [CasaNotify Controle 2.5.0 — cadastro, login e ajustes no celular](downloads/CasaNotify-Controle-2.5.0.apk)
+- [CasaNotify Celular 2.5.0 — controle com espelhamento opcional](downloads/CasaNotify-Celular-2.5.0.apk)
+- [Integração Home Assistant 2.3.0](downloads/CasaNotify-TV-Integracao-HA-2.3.0.zip)
 - [Código completo](https://github.com/Douglaslopes24/Casanotify-tv-/archive/refs/heads/main.zip)
 - [Instalação passo a passo](docs/INSTALACAO.md)
 
 Instale a edição TV no receptor e **Celular** no telefone para controlar a TV e espelhar avisos. A edição Controle é uma alternativa sem leitura de notificações. As três edições mantêm o identificador e a assinatura originais; uma substitui a outra no mesmo aparelho. Atualize sem apagar os dados. Certificado HTTPS, senha, câmeras, identidade e vínculos existentes são preservados ao atualizar da 2.2.0, sem apagar dados.
 
-**Atualize também a integração para 2.2.1 para corrigir a recuperação do endereço da TV contra anúncios falsos.** A API 3 exige prova criptográfica da chave vinculada em cada comando. Os clientes antigos deixam de comandar a TV. No app Controle, faça um vínculo inicial em **Perfil → Vincular controle / criar conta** na TV; depois use seu usuário e senha existentes e mantenha **Manter conectado** marcado. Os próximos acessos restauram a sessão automaticamente, sem segundo fator ou SMS. O Home Assistant atualizado reaproveita sua chave existente.
+**Atualize também a integração para 2.3.0 para corrigir a recuperação do endereço da TV contra anúncios falsos.** A API 3 exige prova criptográfica da chave vinculada em cada comando. Os clientes antigos deixam de comandar a TV. No app Controle, faça um vínculo inicial em **Perfil → Vincular controle / criar conta** na TV; depois use seu usuário e senha existentes e mantenha **Manter conectado** marcado. Os próximos acessos restauram a sessão automaticamente, sem segundo fator ou SMS. O Home Assistant atualizado reaproveita sua chave existente.
 
 O primeiro cadastro, login e todos os ajustes ficam dentro do aplicativo de controle. A TV **não serve mais painel nem tela de login ao navegador**. Os 10 MP3s enviados foram adicionados aos 6 toques existentes.
 TV e Controle não incluem leitor de notificações de outros aplicativos. A edição Celular adiciona o espelhamento opcional e continua sujeita às restrições do Android/Play Protect. Nenhuma edição tem aprovação garantida do Google. [Entenda os avisos das capturas](docs/SEGURANCA_ANDROID.md).
 
-**Integração 2.2.1:** ação de câmera por entidade do HA, HTTPS com certificado aprovado, comandos autenticados com desafio de uso único e 16 opções de toque. As 37 entidades e seus identificadores permanecem estáveis.
+**Integração 2.3.0:** ação de câmera por entidade do HA, HTTPS com certificado aprovado, comandos autenticados com desafio de uso único e 16 opções de toque. As 37 entidades e seus identificadores permanecem estáveis.
 
-## Atualização de segurança 2.4.1 / HA 2.2.1
+## Novidades da versão 2.5.0 / HA 2.3.0
 
-- Descoberta do HA só altera o IP após autenticar a TV com certificado e chave já salvos; anúncios falsos não substituem essa confiança.
-- Limites por endereço e prazos absolutos encerram conexões paradas, envio lento e clientes que não leem respostas.
-- JSON estrito, limites de profundidade/tamanho e recusa de compressão nas APIs reduzem ambiguidades e consumo abusivo de recursos.
-- 82 testes Java e 112 testes Python locais aprovados. Conta, vínculos, assinatura e 37 entidades preservados. Leia [o relatório e seus limites](docs/SEGURANCA_2_4_1.md).
+- **Início organizado:** Criar aviso, Aparência, Controle remoto e Atividades. O menu **⋮** reúne Home Assistant, Personalização, Conta e conexões, câmeras e demais configurações.
+- **Controle pelo vínculo CasaNotify:** setas, OK, Voltar, Início, volume, mudo e reprodução usam o acesso já salvo. Na TV, autorize uma vez o serviço opcional em **Autorizar controle remoto**. Não há outro PIN nem pareamento com Android TV Remote Service. Algumas telas não aceitam navegação por acessibilidade.
+- **RTSP separado no aplicativo:** cadastre a câmera e abra uma janela só com vídeo e o botão **Liberar**. Fechar essa janela não limpa a fila de avisos. As automações de câmera continuam pelo Home Assistant.
+- **Mais formatos de vídeo:** Media3 1.11.1, leitores RTSP/RTP para H.264, H.265, H.263, MPEG-4 Visual, VP8 e VP9. A reprodução depende do perfil da câmera e dos decodificadores da TV; não há transcodificação nem FFmpeg. Opções automática/hardware/software, transporte TCP/automático e buffer de 250–3000 ms.
+- **Som 1 até Som 16:** nomes sequenciais no aplicativo e na integração, preservando IDs das automações e os dez MP3s originais.
+- **Continuidade preservada:** descoberta automática, recuperação autenticada do IP, login automático autorizado sem salvar senha, fila cifrada e serviço de avisos independente da tela do app. Forçar parada ou restrições do Android podem interromper o serviço.
+- **Segurança:** HTTPS com certificado aprovado, provas HMAC com desafio de uso único, sessões/CSRF e limites de rede da 2.4.1 mantidos. Controle remoto exige chave de controle e sessão; a chave limitada de espelhamento não controla a TV nem acessa câmeras.
+- VPN do aplicativo continua oculta e desativada. Tema claro/escuro/sistema, ícones, posições, imagem interna, fundo e animações permanecem disponíveis.
 
-## Recursos da 2.4.0 mantidos
+Conta local por usuário e senha, sem segundo fator/SMS; um proprietário por TV. O primeiro cadastro inclui termos e agradecimento personalizado. A edição **Celular** permite escolher os aplicativos cujos avisos serão enviados, mediante autorização Android. Envio e conteúdo começam desativados em uma instalação nova.
 
-- **Controle remoto nativo:** setas, OK, voltar, início, volume, mudo, reprodução e espera. Abra **Remoto** no celular e confirme uma vez o PIN exibido pelo Android TV Remote Service. O vínculo fica salvo; não exige ADB nem acessibilidade.
-- **Avisos com a tela do app fechada:** serviço contínuo com notificação e botão Pausar, recuperação do listener, fila cifrada, retomada após reinício e registros temporários para evitar reenvio após reconexão. O Android ainda pode restringir o app; Forçar parada exige reabri-lo.
-- **Câmeras pelo Home Assistant:** nova ação `casanotify_tv.send_camera_notification`, que recebe uma entidade `camera.*`. O Home Assistant resolve a fonte RTSP e dispara o aviso; a TV reproduz. Configuração e envio de RTSP foram retirados do celular e bloqueados para sua chave na API.
-- **VPN oculta e desativada:** não altera VPNs já configuradas no Android. O sensor de estado da VPN permanece no HA para preservar entidades existentes.
-- Descoberta automática, recuperação autenticada do IP, login automático sem salvar senha e personalização das versões anteriores preservados.
-
-## Recursos
-
-- Aplicativo de controle com cadastro e login por usuário/senha, conectado por HTTPS à TV. Sem autenticação de dois fatores nem SMS.
-- Cadastro com aceite dos termos e agradecimento com o nome escolhido; alteração de nome e senha; recuperação presencial pela TV.
-- Câmeras RTSP do Home Assistant, vídeo sem áudio por padrão. A TV precisa alcançar a fonte da câmera; prefira H.264. Perfis de versões antigas ficam preservados, acessíveis somente pelo HA.
-- Dezesseis toques, 21 ícones, cinco paletas, nove posições e ajuste de cores, transparência, tamanho, duração, voz e volume.
-- Tema claro, escuro ou do sistema; animação ao iniciar; logo interno e fundo personalizados, com recorte, zoom, rotação e brilho no aplicativo de controle. O ícone instalado no launcher permanece o original.
-- Espelhamento opcional na edição CasaNotify Celular, para aplicativos escolhidos, como WhatsApp e delivery. Depende da autorização de acesso às notificações no Android; envio e conteúdo começam desativados em uma instalação nova.
-- Controle remoto com pareamento próprio do Android TV Remote Service. TV Boxes com Android comum podem não ter esse serviço.
+[O que foi validado e o que ainda depende de aparelhos físicos](docs/VERSAO_2_5.md).
 
 ## Vincular ao Home Assistant
 

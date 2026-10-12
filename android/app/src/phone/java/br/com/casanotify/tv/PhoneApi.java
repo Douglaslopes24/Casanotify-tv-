@@ -3,7 +3,7 @@ import org.json.*;import java.io.*;import java.net.*;import java.nio.charset.Sta
 
 public final class PhoneApi {
     public static String ip(String value){return ControlClient.ipv4(value);}
-    public static JSONObject discover(String host)throws Exception{JSONObject d=request(new URL("http://"+ip(host)+":"+Prefs.PORT+"/api/info"),null,null,null);if(!d.optString("app").equals("CasaNotify TV")||d.optInt("api_version")!=3||!d.optString("tls_fingerprint").matches("[0-9a-f]{64}"))throw new IOException("Atualize a TV para CasaNotify TV 2.4.1.");d.put("host",ip(host));return d;}
+    public static JSONObject discover(String host)throws Exception{JSONObject d=request(new URL("http://"+ip(host)+":"+Prefs.PORT+"/api/info"),null,null,null);if(!d.optString("app").equals("CasaNotify TV")||d.optInt("api_version")!=3||!d.optString("tls_fingerprint").matches("[0-9a-f]{64}"))throw new IOException("Atualize a TV para CasaNotify TV 2.5.0.");d.put("host",ip(host));return d;}
     public static JSONObject call(JSONObject target,String path,JSONObject data)throws Exception{
         if(path.equals("/api/pair"))return request(new URL("https://"+ip(target.getString("host"))+":"+Prefs.SECURE_PORT+path),target.getString("tls_fingerprint"),null,data);
         ControlClient client=new ControlClient(target.getString("host"),LocalTls.pinned(target.getString("tls_fingerprint")),target.getString("token"));JSONObject result=client.request(path,data==null?"GET":"POST",data==null?null:data.toString(),"");if(result.getInt("status")>=300)throw new IOException("A TV recusou o aviso. Atualize os aplicativos e confira o vínculo.");return result.getJSONObject("data");

@@ -38,7 +38,7 @@ public final class ControlClient {
     public static JSONObject discover(String input)throws Exception{
         String host=ipv4(input);HttpURLConnection c=(HttpURLConnection)new URL("http://"+host+":8765/api/info").openConnection();c.setConnectTimeout(5000);c.setReadTimeout(5000);c.setInstanceFollowRedirects(false);c.setUseCaches(false);c.setRequestProperty("Accept-Encoding","identity");
         try(NetworkDeadline deadline=new NetworkDeadline(10000,c::disconnect)){if(c.getResponseCode()!=200)throw new IOException("Ative o receptor na TV e confira o IP.");checkResponse(c,65536);JSONObject info=BoundedJson.object(read(c.getInputStream(),65536),65536);
-            if(!"CasaNotify TV".equals(info.optString("app"))||info.optInt("api_version")!=3||info.optInt("control_protocol")!=2||!info.optString("tls_fingerprint").matches("[0-9a-f]{64}"))throw new IOException("Atualize o aplicativo da TV para a versão 2.4.1 ou posterior.");
+            if(!"CasaNotify TV".equals(info.optString("app"))||info.optInt("api_version")!=3||info.optInt("control_protocol")!=2||!info.optString("tls_fingerprint").matches("[0-9a-f]{64}"))throw new IOException("Atualize o aplicativo da TV para a versão 2.5.0 ou posterior.");
             if(info.optString("device_name").length()>60||info.optString("version").length()>40)throw new IOException("Identidade da TV inválida.");java.util.UUID.fromString(info.getString("device_id"));
             return new JSONObject().put("host",host).put("device_name",info.optString("device_name","Minha TV")).put("device_id",info.getString("device_id")).put("tls_fingerprint",info.getString("tls_fingerprint"));
         }finally{c.disconnect();}

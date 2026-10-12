@@ -1,5 +1,15 @@
 # Histórico
 
+## Aplicativos 2.5.0 e integração 2.3.0 — 12/10/2026
+
+- Início com Criar aviso, Aparência, Controle remoto e Atividades; demais páginas no menu ⋮. Minha marca passa a Personalização; busca de TV com botões Buscar e Manual.
+- Câmera RTSP manual independente, apenas vídeo e Liberar, sem alterar a fila de avisos. Automações continuam no HA.
+- Media3 1.11.1 com leitores RTP adicionais, seleção de decodificador, TCP/automático, buffer limitado e uma tentativa de recuperação por software. Reprodução depende dos codecs da TV.
+- Controle remoto pela chave e sessão CasaNotify existentes, sem outro pareamento; exige serviço opcional autorizado localmente na TV. Comandos limitados e chave de espelhamento isolada.
+- Som 1 a Som 16 no aplicativo e HA, sem mudar IDs ou áudio original.
+- API 3, control_protocol 2, 37 entidades, conta, vínculos e assinatura preservados. APK versionCode 11, termos de 12/10/2026. VPN permanece desativada.
+- Validação e limites em docs/VERSAO_2_5.md.
+
 ## Aplicativos 2.4.1 e integração 2.2.1 — 10/10/2026
 
 - Corrige atualização de IP do HA baseada apenas em mDNS/HTTP públicos: o endereço candidato precisa provar a identidade com certificado e chave já aprovados. Protege também contra sobrepor uma reconfiguração concorrente.

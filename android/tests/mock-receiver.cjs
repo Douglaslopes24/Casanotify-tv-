@@ -1,7 +1,7 @@
 'use strict';
 // Test-only receiver: no real credentials or camera addresses.
 module.exports=function receiver(){
-const state={registered:false,session:false,config:{device_name:'TV de teste',defaults:{},auto_start:false,paused:false,quiet_enabled:false,quiet_start:'22:00',quiet_end:'07:00',ui_theme:'system',startup_animation:true},profile:{username:'douglas',display_name:'Douglas',two_factor:false},events:[],calls:[],cameras:[],phones:[{id:'phone-test',name:'Meu celular'}],notice:null};
+const state={registered:false,session:false,config:{device_name:'TV de teste',defaults:{},auto_start:false,paused:false,quiet_enabled:false,quiet_start:'22:00',quiet_end:'07:00',ui_theme:'system',startup_animation:true},profile:{username:'douglas',display_name:'Douglas',two_factor:false},events:[],calls:[],cameraActive:false,remoteCommands:[],cameras:[],phones:[{id:'phone-test',name:'Meu celular'}],notice:null};
 const csrf='fixture-csrf',result=(status,data)=>({ok:status<300,status,json:async()=>data,blob:async()=>new Blob([]),data});
 async function request(url,opts={}){const pathname=new URL(url,'https://192.168.1.50:8766').pathname,b=opts.body?JSON.parse(opts.body):{},headers=Object.fromEntries(Object.entries(opts.headers||{}).map(([k,v])=>[k.toLowerCase(),v]));state.calls.push({path:pathname,opts});
 if(pathname==='/auth/state')return result(200,{registered:state.registered,terms_version:'2026-10-08'});
@@ -17,6 +17,11 @@ if(pathname==='/api/status')return result(200,{device_name:state.config.device_n
 if(pathname==='/api/notify'){state.notice=b;state.events.push({title:b.title,time:Date.now(),result:'exibido'});return result(200,{status:state.config.paused?'suppressed':'displayed'});}
 if(pathname==='/api/history')return result(200,{items:state.events});
 if(pathname==='/api/clear')return result(200,{status:'cleared'});
+if(pathname==='/api/remote/status')return result(200,{available:true});
+if(pathname==='/api/remote/command'){state.remoteCommands.push(b.command);return result(200,{ok:true});}
+if(pathname==='/api/cameras/show'){state.cameraActive=true;return result(200,{active:true,camera_id:b.id});}
+if(pathname==='/api/cameras/release'){state.cameraActive=false;return result(200,{active:false});}
+if(pathname==='/api/cameras/status')return result(200,{active:state.cameraActive});
 if(pathname==='/api/cameras/save'){state.cameras.push({id:'camera-test',name:b.name});return result(200,{items:state.cameras});}
 if(pathname==='/api/cameras/delete')state.cameras=state.cameras.filter(c=>c.id!==b.id);
 if(pathname==='/api/cameras/test')return result(200,{status:'displayed'});

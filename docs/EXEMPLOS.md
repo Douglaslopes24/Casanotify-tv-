@@ -16,7 +16,7 @@ data:
   urgent: true
 ```
 
-Câmera configurada no Home Assistant (integração CasaNotify 2.2.0):
+Câmera configurada no Home Assistant (integração CasaNotify 2.3.0):
 
 ```yaml
 action: casanotify_tv.send_camera_notification
@@ -87,3 +87,24 @@ data:
 ```
 
 Também pode escolher o toque padrão na entidade de seleção **Toque** ou na aba **Aparência** do controle. A duração dos MP3s recebidos varia de aproximadamente 0,5 a 3,4 segundos; o volume final depende da TV. Os nomes originais e hashes estão em `SONS.json`. Esses arquivos foram fornecidos pelo usuário; a licença MIT do código não é uma declaração de licença dos áudios.
+
+## Opções de vídeo RTSP (TV 2.5 / integração 2.3)
+
+```yaml
+action: casanotify_tv.send_camera_notification
+target:
+  entity_id: notify.tv_da_sala_avisos
+data:
+  camera_entity_id: camera.entrada
+  duration: 30
+  video_muted: true
+  video_decoder: auto
+  video_transport: tcp
+  video_buffer_ms: 800
+  sound: true
+  tone: sound_01  # Som 7; IDs antigos continuam válidos
+```
+
+Adapte os IDs às entidades reais. `hardware` ou `software` restringem a seleção
+aos codecs desse tipo instalados na TV; não adicionam suporte a formatos.
+A câmera manual do celular é separada dessa ação e fica aberta até Liberar.

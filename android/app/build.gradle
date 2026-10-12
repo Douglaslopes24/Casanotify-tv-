@@ -1,9 +1,9 @@
 plugins { id 'com.android.application' }
 android {
  namespace 'br.com.casanotify.tv'
- compileSdk 35
- buildToolsVersion '35.0.0'
- defaultConfig { applicationId 'br.com.casanotify.tv'; minSdk 26; targetSdk 35; versionCode 10; versionName '2.4.1' }
+ compileSdk 36
+ buildToolsVersion '36.0.0'
+ defaultConfig { applicationId 'br.com.casanotify.tv'; minSdk 26; targetSdk 35; versionCode 11; versionName '2.5.0' }
  flavorDimensions 'device'
  productFlavors {
   tv { dimension 'device' }
@@ -21,7 +21,8 @@ android {
   rootProject.file('keystore.properties').withInputStream{keys.load(it)}
   signingConfigs { localRelease { storeFile rootProject.file(keys['storeFile']); storePassword keys['storePassword']; keyAlias keys['keyAlias']; keyPassword keys['keyPassword'] } }
  }
+ androidResources { noCompress += 'mp3' }
  buildTypes { release { minifyEnabled false; if(keys['storeFile']) signingConfig signingConfigs.localRelease } }
  compileOptions { sourceCompatibility JavaVersion.VERSION_1_8; targetCompatibility JavaVersion.VERSION_1_8 }
 }
-dependencies { testImplementation 'junit:junit:4.13.2'; testImplementation 'org.json:json:20240303'; testImplementation 'org.conscrypt:conscrypt-openjdk-uber:2.5.2' }
+dependencies { implementation 'androidx.media3:media3-exoplayer-rtsp:1.11.1'; testImplementation 'junit:junit:4.13.2'; testImplementation 'org.json:json:20240303'; testImplementation 'org.conscrypt:conscrypt-openjdk-uber:2.5.2' }

@@ -29,6 +29,7 @@ def main():
     discovery = {'android.permission.ACCESS_WIFI_STATE', 'android.permission.CHANGE_WIFI_MULTICAST_STATE'}
     receiver = {
         'android.permission.SYSTEM_ALERT_WINDOW',
+        'android.permission.MODIFY_AUDIO_SETTINGS',
         'android.permission.FOREGROUND_SERVICE',
         'android.permission.FOREGROUND_SERVICE_SPECIAL_USE',
         'android.permission.POST_NOTIFICATIONS',
@@ -41,7 +42,7 @@ def main():
         manifest = run(tools / 'aapt', 'dump', 'xmltree', apk, 'AndroidManifest.xml')
         permissions = set(re.findall(r"uses-permission: name='([^']+)'", badging))
         assert permissions == (common | receiver if edition == 'tv' else common | discovery | ({'android.permission.RECEIVE_BOOT_COMPLETED', 'android.permission.FOREGROUND_SERVICE', 'android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE', 'android.permission.POST_NOTIFICATIONS', 'android.permission.WAKE_LOCK'} if edition == 'phone' else set())), permissions
-        assert "name='br.com.casanotify.tv' versionCode='10' versionName='2.4.1'" in badging
+        assert "name='br.com.casanotify.tv' versionCode='11' versionName='2.5.0'" in badging
         assert "sdkVersion:'26'" in badging and "targetSdkVersion:'35'" in badging
         with zipfile.ZipFile(apk) as archive:
             assert archive.testzip() is None
@@ -88,6 +89,17 @@ def main():
             assert re.search(r'android:stopWithTask[^\n]*=\(type 0x12\)0x0', foreground)
             assert re.search(r'android:exported[^\n]*=\(type 0x12\)0x0', foreground)
             assert re.search(r'android:foregroundServiceType[^\n]*=\(type 0x11\)0x10', foreground)
+        if edition == 'tv':
+            assert 'BIND_ACCESSIBILITY_SERVICE' in manifest and '.CasaRemoteService' in manifest
+            config = run(tools / 'aapt', 'dump', 'xmltree', apk, 'res/xml/remote_service.xml')
+            assert re.search(r'android:isAccessibilityTool[^\n]*=\(type 0x12\)0x0', config)
+            assert re.search(r'android:canPerformGestures[^\n]*=\(type 0x12\)0x0', config)
+        else:
+            assert 'BIND_ACCESSIBILITY_SERVICE' not in manifest and '.CasaRemoteService' not in manifest
+            assert b'Lbr/com/casanotify/tv/CasaRemoteService;' not in dex
+        for reader in ('RtpH264Reader', 'RtpH265Reader', 'RtpH263Reader', 'RtpMpeg4Reader', 'RtpVp8Reader', 'RtpVp9Reader'):
+            assert ('Landroidx/media3/exoplayer/rtsp/reader/' + reader + ';').encode() in dex
+        assert b'Lcom/google/common/collect/ImmutableList;' in dex
         vpn = manifest.split('.VpnActivity', 1)[1].split('E:', 1)[0]
         assert re.search(r'android:enabled[^\n]*=\(type 0x12\)0x0', vpn)
         signature = run(java, '-jar', tools / 'lib/apksigner.jar', 'verify', '--print-certs', apk)
