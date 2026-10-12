@@ -36,5 +36,30 @@
       "reauth_successful": "TV vinculada novamente.",
       "reconfigure_successful": "Conexão atualizada."
     }
+  },
+  "entity": {
+    "select": {
+      "tone": {
+        "name": "Toque",
+        "state": {
+          "soft": "Som 1",
+          "doorbell": "Som 2",
+          "chime": "Som 3",
+          "pulse": "Som 4",
+          "alarm": "Som 5",
+          "digital": "Som 6",
+          "sound_01": "Som 7",
+          "sound_02": "Som 8",
+          "sound_03": "Som 9",
+          "sound_04": "Som 10",
+          "sound_05": "Som 11",
+          "sound_06": "Som 12",
+          "sound_07": "Som 13",
+          "sound_08": "Som 14",
+          "sound_09": "Som 15",
+          "sound_10": "Som 16"
+        }
+      }
+    }
   }
 }

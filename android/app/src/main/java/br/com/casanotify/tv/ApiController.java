@@ -39,7 +39,7 @@ public final class ApiController implements LanServer.Handler {
             if(client==null)return LanServer.Response.error(401,"Acesso exclusivo para clientes vinculados. Atualize o app e a integração. No controle, use Menu → Trocar TV para vincular novamente.");
             if(r.method.equals("GET")&&r.path.equals("/api/hello"))return json(info());
             JSONObject payload=r.method.equals("POST")?BoundedJson.object(r.body,1600000):new JSONObject();
-            if(!CameraAccess.allowed(client.role,r.method,r.path,payload))return LanServer.Response.error(403,"Configure e envie avisos de câmera pelo Home Assistant.");
+            if(!CameraAccess.allowed(client.role,r.method,r.path,payload))return LanServer.Response.error(403,"Esta chave não permite controlar câmeras.");
             if(r.path.startsWith("/auth/")&&!client.role.equals("control"))return LanServer.Response.error(403,"Esta operação exige o aplicativo de controle vinculado.");
             if(r.method.equals("GET")&&r.path.equals("/auth/state"))return json(new JSONObject().put("registered",accounts.exists()).put("terms_version",AccountManager.TERMS_VERSION));
             if(r.method.equals("POST")&&r.path.startsWith("/auth/")){
@@ -66,10 +66,13 @@ public final class ApiController implements LanServer.Handler {
             }
             if(r.path.equals("/auth/session")&&r.method.equals("GET")){if(session==null)return LanServer.Response.error(401,"Login da conta necessário.");return json(new JSONObject().put("profile",accounts.profile()).put("csrf",session.csrf));}
             if(r.path.startsWith("/auth/")&&session==null)return LanServer.Response.error(403,"Esta operação exige login da conta.");
+            if(r.path.startsWith("/api/remote/")&&!RemotePolicy.allowed(client.role,session!=null))return LanServer.Response.error(403,"O controle remoto exige login no aplicativo de controle vinculado.");
             if(r.method.equals("GET"))switch(r.path){
                 case "/api/config":return json(prefs.config());
                 case "/api/history":return onMain(()->json(new JSONObject().put("items",overlay.history())));
                 case "/api/status":return onMain(()->json(info().put("quiet_active",prefs.quietActive()).put("paused",prefs.config().optBoolean("paused")).put("overlay_permission",Settings.canDrawOverlays(context)).put("addresses",new JSONArray(NetworkInfo.addresses())).put("overlay",overlay.state()).put("vpn_active",VpnActivity.active(context))));
+                case "/api/remote/status":return onMain(()->json(new JSONObject().put("available",TvRemote.available())));
+                case "/api/cameras/status":return onMain(()->json(overlay.manualCamera.status()));
                 case "/api/cameras":return json(new JSONObject().put("items",cameras.list()));
                 case "/api/phones":return json(new JSONObject().put("items",phones.publicList()));
                 case "/media/logo":case "/media/background":byte[] bytes=media.bytes(r.path.substring(7));return bytes==null?LanServer.Response.error(404,"Sem imagem personalizada."):new LanServer.Response(200,"image/png",bytes);
@@ -85,8 +88,11 @@ public final class ApiController implements LanServer.Handler {
                     case "/api/config":return onMain(()->{JSONObject c=prefs.update(d);if(c.optBoolean("paused"))overlay.clear("");return json(c);});
                     case "/api/media":media.save(string(d,"kind",20),string(d,"data",1500000));return json(new JSONObject().put("ok",true));
                     case "/api/media/remove":media.remove(string(d,"kind",20));return json(new JSONObject().put("ok",true));
-                    case "/api/cameras/save":cameras.save(string(d,"id",80),string(d,"name",60),string(d,"url",2048));return json(new JSONObject().put("items",cameras.list()));
-                    case "/api/cameras/delete":cameras.remove(string(d,"id",80));return json(new JSONObject().put("items",cameras.list()));
+                    case "/api/cameras/save":Notice.rejectUnknown(d,new HashSet<>(Arrays.asList("id","name","url")));cameras.save(string(d,"id",80),string(d,"name",60),string(d,"url",2048));return json(new JSONObject().put("items",cameras.list()));
+                    case "/api/cameras/delete":Notice.rejectUnknown(d,Collections.singleton("id"));String removed=string(d,"id",80);cameras.remove(removed);return onMain(()->{overlay.manualCamera.closeIf(removed);return json(new JSONObject().put("items",cameras.list()));});
+                    case "/api/cameras/show":Notice.rejectUnknown(d,new HashSet<>(Arrays.asList("id","video_decoder","video_transport","video_buffer_ms","video_muted")));String selected=string(d,"id",80);JSONObject manual=new RtspOptions(d).put(new JSONObject().put("video_url",cameras.url(selected)).put("video_muted",Notice.bool(d,"video_muted",true)));Notice popup=new Notice(manual,prefs.defaults());return onMain(()->overlay.manualCamera.show(selected,popup));
+                    case "/api/cameras/release":Notice.rejectUnknown(d,Collections.emptySet());return onMain(()->{overlay.manualCamera.close();return json(overlay.manualCamera.status());});
+                    case "/api/remote/command":String command=RemotePolicy.command(d);return onMain(()->{int code=TvRemote.execute(command);return code==200?json(new JSONObject().put("ok",true)):LanServer.Response.error(code,code==429?"Aguarde antes de enviar mais comandos.":"Autorize o controle remoto na TV. Algumas telas não aceitam este comando.");});
                     case "/api/cameras/test":Notice camera=new Notice(new JSONObject().put("title","Câmera ao vivo").put("message","Transmissão RTSP").put("icon","camera").put("video_url",cameras.url(string(d,"id",80))).put("duration",30).put("replace",true),prefs.defaults());return onMain(()->overlay.receive(camera));
                     case "/api/phones/link":if(session==null||!client.role.equals("control"))return LanServer.Response.error(403,"Entre no controle para vincular avisos.");return json(new JSONObject().put("token",phones.issueLinked(client.id,Notice.string(d,"name","Meu celular",60))));
                     case "/api/phones/revoke":phones.revoke(string(d,"id",80));return json(new JSONObject().put("items",phones.publicList()));

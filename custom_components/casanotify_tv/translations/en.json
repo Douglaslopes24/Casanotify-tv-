@@ -36,5 +36,30 @@
       "reauth_successful": "TV paired again.",
       "reconfigure_successful": "Connection updated."
     }
+  },
+  "entity": {
+    "select": {
+      "tone": {
+        "name": "Sound",
+        "state": {
+          "soft": "Sound 1",
+          "doorbell": "Sound 2",
+          "chime": "Sound 3",
+          "pulse": "Sound 4",
+          "alarm": "Sound 5",
+          "digital": "Sound 6",
+          "sound_01": "Sound 7",
+          "sound_02": "Sound 8",
+          "sound_03": "Sound 9",
+          "sound_04": "Sound 10",
+          "sound_05": "Sound 11",
+          "sound_06": "Sound 12",
+          "sound_07": "Sound 13",
+          "sound_08": "Sound 14",
+          "sound_09": "Sound 15",
+          "sound_10": "Sound 16"
+        }
+      }
+    }
   }
 }

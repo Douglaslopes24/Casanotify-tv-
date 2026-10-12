@@ -10,8 +10,8 @@ import org.json.*;
 /** A single selected receiver; session cookies never enter WebView or persistent storage. */
 public final class ControlClient {
     private static final int LIMIT=2*1024*1024;
-    private static final Set<String> READ=new HashSet<>(Arrays.asList("/api/hello","/auth/state","/auth/session","/api/config","/api/status","/api/history","/api/phones","/media/logo","/media/background"));
-    private static final Set<String> WRITE=new HashSet<>(Arrays.asList("/api/phones/link","/auth/resume","/auth/register","/auth/login","/auth/logout","/auth/profile","/auth/password","/api/config","/api/notify","/api/clear","/api/media","/api/media/remove","/api/phones/revoke"));
+    private static final Set<String> READ=new HashSet<>(Arrays.asList("/api/hello","/auth/state","/auth/session","/api/config","/api/status","/api/history","/api/phones","/media/logo","/media/background","/api/cameras","/api/cameras/status","/api/remote/status"));
+    private static final Set<String> WRITE=new HashSet<>(Arrays.asList("/api/phones/link","/auth/resume","/auth/register","/auth/login","/auth/logout","/auth/profile","/auth/password","/api/config","/api/notify","/api/clear","/api/media","/api/media/remove","/api/phones/revoke","/api/cameras/save","/api/cameras/delete","/api/cameras/show","/api/cameras/release","/api/remote/command"));
     interface ConnectionFactory { HttpURLConnection open(URL url)throws Exception; }
     private final String host,token;private final SSLSocketFactory tls;private final ConnectionFactory factory;private final long requestTimeout;
     private String cookie="";

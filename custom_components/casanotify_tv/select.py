@@ -25,6 +25,9 @@ class CasaNotifySelect(CasaNotifyEntity, SelectEntity):
     def __init__(self, coordinator, key, name, icon, options):
         super().__init__(coordinator, key, name, icon, EntityCategory.CONFIG)
         self._attr_options = options
+        if key == "tone":
+            self._attr_name = None
+            self._attr_translation_key = "tone"
 
     @property
     def current_option(self):

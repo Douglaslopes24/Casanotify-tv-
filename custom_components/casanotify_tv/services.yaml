@@ -17,6 +17,37 @@ send_notification:
       name: Título
       selector:
         text: {}
+    video_decoder:
+      name: Decodificação do vídeo
+      description: 'TV 2.5.0+: Automática tenta os decodificadores da TV; Software usa um decodificador de software disponível no Android. Não instala codecs e não converte a câmera.'
+      selector:
+        select:
+          options:
+          - label: Automática (recomendada)
+            value: auto
+          - label: Hardware da TV
+            value: hardware
+          - label: Software disponível na TV
+            value: software
+    video_transport:
+      name: Transporte RTSP
+      description: 'TV 2.5.0+: TCP é o padrão e costuma funcionar melhor entre redes. Automático tenta UDP e permite fallback para TCP.'
+      selector:
+        select:
+          options:
+          - label: TCP (recomendado)
+            value: tcp
+          - label: Automático (UDP/TCP)
+            value: auto
+    video_buffer_ms:
+      name: Buffer do vídeo
+      description: 'TV 2.5.0+: padrão 800 ms. Aumente se o vídeo engasgar; valores maiores aumentam o atraso.'
+      selector:
+        number:
+          min: 250
+          max: 3000
+          unit_of_measurement: ms
+          mode: box
     id:
       name: Identificador do aviso
       selector:
@@ -195,6 +226,37 @@ send_notification:
       name: Vídeo sem áudio
       selector:
         boolean: {}
+    video_decoder:
+      name: Decodificação do vídeo
+      description: 'TV 2.5.0+: Automática tenta os decodificadores da TV; Software usa um decodificador de software disponível no Android. Não instala codecs e não converte a câmera.'
+      selector:
+        select:
+          options:
+          - label: Automática (recomendada)
+            value: auto
+          - label: Hardware da TV
+            value: hardware
+          - label: Software disponível na TV
+            value: software
+    video_transport:
+      name: Transporte RTSP
+      description: 'TV 2.5.0+: TCP é o padrão e costuma funcionar melhor entre redes. Automático tenta UDP e permite fallback para TCP.'
+      selector:
+        select:
+          options:
+          - label: TCP (recomendado)
+            value: tcp
+          - label: Automático (UDP/TCP)
+            value: auto
+    video_buffer_ms:
+      name: Buffer do vídeo
+      description: 'TV 2.5.0+: padrão 800 ms. Aumente se o vídeo engasgar; valores maiores aumentam o atraso.'
+      selector:
+        number:
+          min: 250
+          max: 3000
+          unit_of_measurement: ms
+          mode: box
     camera_id:
       name: ID da câmera salva
       description: Compatibilidade com câmeras salvas em versões antigas. Para novos avisos, use Mostrar câmera na TV com a entidade do Home Assistant.
@@ -205,22 +267,38 @@ send_notification:
       selector:
         select:
           options:
-          - soft
-          - doorbell
-          - chime
-          - pulse
-          - alarm
-          - digital
-          - sound_01
-          - sound_02
-          - sound_03
-          - sound_04
-          - sound_05
-          - sound_06
-          - sound_07
-          - sound_08
-          - sound_09
-          - sound_10
+          - value: soft
+            label: Som 1
+          - value: doorbell
+            label: Som 2
+          - value: chime
+            label: Som 3
+          - value: pulse
+            label: Som 4
+          - value: alarm
+            label: Som 5
+          - value: digital
+            label: Som 6
+          - value: sound_01
+            label: Som 7
+          - value: sound_02
+            label: Som 8
+          - value: sound_03
+            label: Som 9
+          - value: sound_04
+            label: Som 10
+          - value: sound_05
+            label: Som 11
+          - value: sound_06
+            label: Som 12
+          - value: sound_07
+            label: Som 13
+          - value: sound_08
+            label: Som 14
+          - value: sound_09
+            label: Som 15
+          - value: sound_10
+            label: Som 16
     backdrop:
       name: Plano de fundo
       selector:
@@ -243,7 +321,7 @@ clear_notification:
 
 send_camera_notification:
   name: Mostrar câmera na TV
-  description: O Home Assistant resolve a câmera RTSP e envia o aviso à TV. Não depende do aplicativo do celular aberto. A câmera precisa fornecer RTSP acessível pela TV.
+  description: O Home Assistant resolve a câmera RTSP e envia o aviso à TV. Não depende do aplicativo do celular aberto. A câmera precisa fornecer RTSP acessível pela TV. TV 2.5.0 aceita H.264, H.265/HEVC, H.263, MPEG-4 Visual, VP8 e VP9 conforme os decodificadores do aparelho.
   target:
     entity:
       domain: notify
@@ -306,22 +384,38 @@ send_camera_notification:
       selector:
         select:
           options:
-          - soft
-          - doorbell
-          - chime
-          - pulse
-          - alarm
-          - digital
-          - sound_01
-          - sound_02
-          - sound_03
-          - sound_04
-          - sound_05
-          - sound_06
-          - sound_07
-          - sound_08
-          - sound_09
-          - sound_10
+          - value: soft
+            label: Som 1
+          - value: doorbell
+            label: Som 2
+          - value: chime
+            label: Som 3
+          - value: pulse
+            label: Som 4
+          - value: alarm
+            label: Som 5
+          - value: digital
+            label: Som 6
+          - value: sound_01
+            label: Som 7
+          - value: sound_02
+            label: Som 8
+          - value: sound_03
+            label: Som 9
+          - value: sound_04
+            label: Som 10
+          - value: sound_05
+            label: Som 11
+          - value: sound_06
+            label: Som 12
+          - value: sound_07
+            label: Som 13
+          - value: sound_08
+            label: Som 14
+          - value: sound_09
+            label: Som 15
+          - value: sound_10
+            label: Som 16
     urgent:
       name: Urgente
       selector:

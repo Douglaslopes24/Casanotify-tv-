@@ -1,0 +1,3 @@
+<resources>
+ <string name="remote_service_description">Permite executar setas, OK, Voltar, Início, volume e reproduzir/pausar enviados pelo seu controle CasaNotify vinculado e autenticado. Usa a estrutura de foco da tela. Não coleta textos, senhas ou imagens, não grava a tela e não executa gestos ou rotinas automáticas. Você pode desativar a qualquer momento.</string>
+</resources>
